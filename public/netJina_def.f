@@ -80,6 +80,7 @@ contains
             call integer_dict_free(r% reaclib_dict)
             nullify(r% reaclib_dict)
         end if
+        r% Nentries = n
 	end subroutine allocate_reaclib_data
 
 	subroutine free_reaclib_data(r)
@@ -92,6 +93,7 @@ contains
 		if (allocated(r% Qvalue)) deallocate(r% Qvalue)
 		if (allocated(r% coefficients)) deallocate(r% coefficients)
         if (associated(r% reaclib_data)) call integer_dict_free(r% reaclib_dict)
+        r% Nentries = 0
 	end subroutine free_reaclib_data
     
 end module netJina_def
