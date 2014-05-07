@@ -44,6 +44,7 @@ module netJina_def
     
 	! storage container for reaclib file
 	type reaclib_data
+        integer :: Nentries
 		integer,dimension(:),allocatable :: chapter
 		character(len=iso_name_length),dimension(:,:),allocatable :: species
 		character(len=iso_name_length),dimension(:),allocatable :: label
@@ -55,7 +56,7 @@ module netJina_def
 	end type reaclib_data
 
 	! container to hold locations for all terms for a given rate. Reaclib uses a
-	! seven-term fit for each entry.  If this is insufficient, it uses more &
+	! seven-term fit for each entry.  If this is insufficient, it uses more
 	! than one entry per reaction.
 	type rate_location
 		character(len=max_id_length) :: reaction_handle
@@ -63,4 +64,34 @@ module netJina_def
 		integer, dimension(max_terms_per_rate) :: indices
 	end type rate_location
 
+contains
+	subroutine allocate_reaclib_data(r, n, ierr)
+        use utils_lib, only: integer_dict_free
+		type(reaclib_data), intent(out) :: r
+		integer, intent(in) :: n
+		integer, intent(out) :: ierr
+	
+		ierr = 0
+		allocate(r%chapter(n),r%species(max_species_per_reaction,n), &
+		& r%label(n),r%reaction_flag(n), &
+		& r%reverse_flag(n),r%Qvalue(n),r%coefficients(ncoefficients,n), &
+		& stat=ierr)
+        if (associate(r% reaclib_dict)) then
+            call integer_dict_free(r% reaclib_dict)
+            nullify(r% reaclib_dict)
+        end if
+	end subroutine allocate_reaclib_data
+
+	subroutine free_reaclib_data(r)
+		type(reaclib_data), intent(inout) :: r
+		if (allocated(r% chapter)) deallocate(r% chapter)
+		if (allocated(r% species)) deallocate(r% species)
+		if (allocated(r% label)) deallocate(r% label)
+		if (allocated(r% reaction_flag)) deallocate(r% reaction_flag)
+		if (allocated(r% reverse_flag)) deallocate(r% reverse_flag)
+		if (allocated(r% Qvalue)) deallocate(r% Qvalue)
+		if (allocated(r% coefficients)) deallocate(r% coefficients)
+        if (associated(r% reaclib_data)) call integer_dict_free(r% reaclib_dict)
+	end subroutine free_reaclib_data
+    
 end module netJina_def
