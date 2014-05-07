@@ -18,7 +18,7 @@ to load the reaclib database.
 
 Then, to get a rate compatible with bdat-based networks
 
-	call get_rate(ratedb,isotope,rates,n_coeff,q,ierr)
+	call get_rate(ratedb,isotope,rates,n_coeff,q,status,ierr)
 	
 where
 
@@ -27,6 +27,8 @@ where
 	rates(max_coeff,max_channels) 	:= array of coeffiencts for rates
 	n_coeff(max_channels)			:= number of coefficients for each channel
 	q(max_channels)					:= q-value for each channel
+	status(max_channels)			:= logical mask arrary.  stores FALSE if the channel is unavailable 
+										or is not a forward rate
 	ierr							:= error flag, 0 means all okay.
 	
 The channels (12 in all) are accessed via the following pointers
