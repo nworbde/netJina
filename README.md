@@ -45,3 +45,5 @@ The channels (12 in all) are accessed via the following pointers
 	i_gn							:= (g,n)
 	i_pn							:= (p,n)
 	
+## How it works
+After reading in the `reaclib` database, the code generates for each rate a "handle" and uses that to build a dictionary.  When called with an isotope, channel pair a handle is easily constructed and used to look up the HEAD rate in the database. The number of terms is stored in the database, so the code just needs to read those terms and pack them into the output.
