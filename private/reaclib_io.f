@@ -122,7 +122,7 @@ contains
         do i_rate = 1, reaclib% Nentries
             nin = nJ_Nin(reaclib% chapter(i_rate))
             nout = nJ_Nout(reaclib% chapter(i_rate))
-            handle = generate_handle(reaclib% species(:,i_rate), Nin, Nout)
+            handle = do_generate_handle(reaclib% species(:,i_rate), Nin, Nout)
             ! if we have a new handle, enter the location in the dictionary
             ! otherwise, increment the N_rate_terms entry
             call integer_dict_lookup(rate_dict,handle,indx,ikey)
@@ -146,7 +146,7 @@ contains
         end do
     end subroutine do_parse_rates
     
-    function generate_handle(species,nin,nout) result(handle)
+    function do_generate_handle(species,nin,nout) result(handle)
         use netJina_def
         
         character(len=iso_name_length),dimension(:),intent(in) :: species
@@ -163,6 +163,6 @@ contains
         do i = nin+1,min(nin+nout,size(species))
             handle = trim(handle)//adjustl(species(i))
         end do
-    end function generate_handle
+    end function do_generate_handle
     
 end module reaclib_io
