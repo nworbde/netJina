@@ -17,7 +17,7 @@ module reaclib_io
 
 contains
     
-    subroutine do_read_reaclib(filename,rates,ierr)
+    subroutine do_load_reaclib(filename,rates,ierr)
     	use, intrinsic :: iso_fortran_env, only: iostat_end, error_unit
     	use netJina_def
         use utils_lib, only: alloc_iounit
@@ -29,7 +29,7 @@ contains
 
     	ierr = 0
         reaclib_unitno = alloc_iounit(ierr)
-        if (ierr /= 0) return
+        if (failure('allocating iounit',ierr)) return
         
     	open(unit=reaclib_unitno, file=trim(filename), iostat=ierr, status="old", action="read")
         if (failure('opening'//trim(filename),ierr)) return
@@ -58,7 +58,7 @@ contains
     		count = count + 1
     	end do
     	close(reaclib_unitno)
-        
+        write(error_unit,*) 'received ',count,' entries'
     	rates% Nentries = count
         
     contains
@@ -69,13 +69,13 @@ contains
             character(len=*), parameter :: err_format = '("Error while ",a,i0)'
             
             if (ierr == 0) then
-                failure = .TRUE.
+                failure = .FALSE.
                 return
             end if
-            failure = .FALSE.
+            failure = .TRUE.
             write (error_unit,err_format) action, ierr
         end function failure
-    end subroutine do_read_reaclib
+    end subroutine do_load_reaclib
     
 
 end module reaclib_io

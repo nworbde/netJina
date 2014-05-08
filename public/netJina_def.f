@@ -9,6 +9,7 @@
 module netJina_def
     use const_def, only: sp,dp
     use utils_def, only: integer_dict
+    use utils_lib, only: integer_dict_free
 
     ! reaclib uses a character handle for each isotope
     integer, parameter :: iso_name_length = 5

@@ -18,7 +18,9 @@ contains
         
         ierr = 0
         if (reaclib% Nentries /= 0) call free_reaclib_data(reaclib)
+        print *,'loading reaclib'
         call do_load_reaclib(filename,reaclib,ierr)
+        print *,'reaclib loaded'
     end subroutine load_reaclib
 
 end module netJina_lib
