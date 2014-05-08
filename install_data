@@ -1,0 +1,11 @@
+#!/bin/bash
+
+mkdir -p data
+echo "getting reaclib"
+cd data
+curl -o reaclib_db.gz https://groups.nscl.msu.edu/jina/reaclib/db/reaclibs/20140508default2.gz
+echo "unpacking data"
+gunzip reaclib_db.gz
+echo "getting winvn file"
+curl -o nuclide_db     https://groups.nscl.msu.edu/jina/reaclib/db/associated_files/Recommended/winvne_v2.0.dat
+cd ..
