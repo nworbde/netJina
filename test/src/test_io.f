@@ -4,32 +4,41 @@ program test_io
     use netJina_lib
     use utils_lib
     
-    character(len=*), parameter :: reaclib_file = '../data/20140507default2'
+    character(len=*), parameter :: datadir = '../data'
     type(reaclib_data) :: reaclib
+    type(nuclib_data) :: nuclib
     integer :: ierr
     integer :: i,j
-    type(integer_dict), pointer :: rates_dict=>null()
+    type(integer_dict), pointer :: rates_dict=>null(), nuclide_dict=>null()
     integer :: max_terms, indx(1), dindx
     character(len=max_id_length) :: handle
     
-    call load_reaclib(reaclib_file,reaclib,rates_dict,ierr)
-    
-    if (ierr == 0) then
-        do i = 1,reaclib% Nentries
-            if (reaclib% chapter(i) == 5) exit
-        end do
-        if (reaclib% chapter(i) == 5) then
-            write(output_unit,'(a)') 'Here are the first 50 entries of chapter 5'
-            do j = i,i+50
-                write(output_unit,'(a5,a5," ==> ",a5,a5)')  &
-                & reaclib% species(1:4,j)
-            end do
-        else
-            write(error_unit,'(a)') 'unable to find reactions in chapter 5'
-        end if
-    else
+    call netJina_init(datadir,nuclib,nuclide_dict,reaclib,rates_dict,ierr)
+    if (ierr /= 0) then
         write(error_unit,*) 'load reaclib returned error ',ierr
+        stop
     end if
+    
+    call integer_dict_lookup(nuclide_dict,'cn337',dindx,ierr)
+    if (ierr /=0) then
+        write(error_unit,*) 'cn337 is not on the list'
+    else
+        write(output_unit,*) nuclib% name(dindx), nuclib% A(dindx)
+    end if
+    
+    do i = 1,reaclib% Nentries
+        if (reaclib% chapter(i) == 5) exit
+    end do
+    if (reaclib% chapter(i) == 5) then
+        write(output_unit,'(a)') 'Here are the first 50 entries of chapter 5'
+        do j = i,i+50
+            write(output_unit,'(a5,a5," ==> ",a5,a5)')  &
+            & reaclib% species(1:4,j)
+        end do
+    else
+        write(error_unit,'(a)') 'unable to find reactions in chapter 5'
+    end if
+
     max_terms = maxval(reaclib% N_rate_terms)
     indx = maxloc(reaclib% N_rate_terms)
     

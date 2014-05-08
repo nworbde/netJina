@@ -11,10 +11,19 @@ module netJina_def
     use utils_def, only: integer_dict
     use utils_lib, only: integer_dict_free
 
-    ! reaclib uses a character handle for each isotope
+    ! data storage parameter for nuclib
+    ! each isotope has a name and "provenance" -- a reference to where the 
+    ! mass, spin, partition function are described.
     integer, parameter :: iso_name_length = 5
+    integer, parameter :: provenance_length = 6
+    ! maximum number of nuclides in nucchem database
+	integer, parameter :: max_nnuclib=10000
+    ! no. entries in partition fcn table
+	integer, parameter :: npfcn = 24
+
     ! maximum number of individual rates in reaclib.
-	integer, parameter :: max_nreaclib=120000
+	integer, parameter :: max_nreaclib=120000    
+    ! data storage parameters for reaclib
 	integer, parameter :: max_species_per_reaction=6
 	integer, parameter :: ncoefficients=7
 	integer, parameter :: nchapters=11
@@ -46,6 +55,25 @@ module netJina_def
 	! aluminum-26 isomers
 	character(len=iso_name_length), dimension(2:3) ::  &
 	& al_isomers = [character(len=iso_name_length) :: 'al-6','al*6']
+    
+    ! storage for nuclib database
+	type nuclib_data
+		integer :: Nnuclides
+        ! for each nuclide, store its name, provenance, mass (real), charge and 
+        ! neutron numbers, ground-state spin, mass excess (MeV) and partition 
+        ! function table
+		character(len=iso_name_length), dimension(:), allocatable :: name
+        character(len=provenance_length),dimension(:), allocatable :: provenance
+		real(dp), dimension(:), allocatable :: A
+		integer, dimension(:), allocatable  :: Z
+		integer, dimension(:), allocatable :: N
+		real(dp), dimension(:), allocatable :: spin
+		real(dp), dimension(:), allocatable :: mass_excess
+		real(dp), dimension(:,:), allocatable :: pfcn
+	end type nuclib_data
+    
+    ! temperatures, partition function evaluation
+    real(dp), dimension(npfcn) :: pfcn_T9
     
     ! flags for reaction channels, bdat-style
 	integer, parameter :: i_pg = 1

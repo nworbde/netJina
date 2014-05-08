@@ -10,29 +10,47 @@ module netJina_lib
     use utils_def, only: integer_dict
     
 contains
-    subroutine load_reaclib(filename,reaclib,rate_dict,ierr)
+    subroutine netJina_init(datadir,nuclib,nuclide_dict,reaclib,rate_dict,ierr)
         use iso_fortran_env, only: error_unit
         use netJina_def
         use netJina_io
         use netJina_storage
         use utils_lib, only: integer_dict_size
+        character(len=*),parameter :: reaclib_db = 'reaclib_db'
+        character(len=*),parameter :: nuclib_db = 'nuclide_db'
         
-        character(len=*), intent(in) :: filename
+        character(len=*), intent(in) :: datadir
+        type(nuclib_data), intent(out) :: nuclib
+        type(integer_dict), pointer :: nuclide_dict
         type(reaclib_data), intent(out) :: reaclib
         type(integer_dict), pointer :: rate_dict
         integer, intent(out) :: ierr
+
+        character(len=160) :: reaclib_filename, nuclib_filename
         
-        ierr = 0
+        nuclib_filename = trim(datadir)//'/'//nuclib_db
+        reaclib_filename = trim(datadir)//'/'//reaclib_db
         if (reaclib% Nentries /= 0) call free_reaclib_data(reaclib)
+
+        ierr = 0
+        write(error_unit,'(a)')  &
+        & 'loading nuclib from '//trim(nuclib_filename)//'...'        
+        call do_load_nuclib(nuclib_filename,nuclib,ierr)
+        write(error_unit,'(/,a,i0,a)')  &
+        & 'done. ',nuclib% Nnuclides, &
+        & ' nuclides retrieved. now writing nuclide dictionary...'
+        call do_parse_nuclides(nuclib,nuclide_dict,ierr)
+        write(error_unit,'(a//)') 'done.'
         
-        write(error_unit,'(a)') 'loading reaclib from '//trim(filename)//'...'
-        call do_load_reaclib(filename,reaclib,ierr)
+        write(error_unit,'(a)')  &
+        & 'loading reaclib from '//trim(reaclib_filename)//'...'
+        call do_load_reaclib(reaclib_filename,reaclib,ierr)
         write(error_unit,'(a,i0,a)') 'done. ',reaclib% Nentries, &
         & ' entries retrieved. now writing reaction dictionary...'
         call do_parse_rates(reaclib,rate_dict,ierr)
         write(error_unit,'(a,i0,a)') 'done. ',integer_dict_size(rate_dict), &
         & ' unique rates found.'
-    end subroutine load_reaclib
+    end subroutine netJina_init
 
     subroutine get_handle(reaclib,indx,handle)
         use netJina_def, only: reaclib_data, nJ_Nin, nJ_Nout, max_id_length
