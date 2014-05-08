@@ -84,7 +84,86 @@ contains
             failure = .TRUE.
             write (error_unit,err_format) action, ierr
         end function failure
+        
+        subroutine copy_reaclib_data(old_data,new_data,ierr)
+            type(reaclib_data), intent(in) :: old_data
+            type(reaclib_data), intent(out) :: new_data
+            integer, intent(out) :: ierr
+            integer :: n
+        
+            if (new_data% Nentries /= 0) call free_reaclib_data(new_data)
+            call allocate_reaclib_data(new_data,old_data% Nentries, ierr)
+            if (ierr /= 0) return
+        
+            n = old_data% Nentries
+            new_data% chapter(:) = old_data% chapter(1:n)
+    		new_data% species(:,:) = old_data% species(:,1:n)
+    		new_data% label(:) = old_data% label(1:n)
+    		new_data% reaction_flag(:) = old_data% reaction_flag(1:n)
+    		new_data% reverse_flag(:) = old_data% reverse_flag(1:n)
+    		new_data% Qvalue(:) = old_data% Qvalue(1:n)
+    		new_data% coefficients(:,:) = old_data% coefficients(:,1:n)
+        end subroutine copy_reaclib_data
     end subroutine do_load_reaclib
     
-
+    subroutine do_parse_rates(reaclib,rate_dict,ierr)
+        use utils_def, only: integer_dict
+        use utils_lib, only: integer_dict_define, &
+        & integer_dict_lookup, integer_dict_free
+        use netJina_def
+        
+        type(reaclib_data), intent(inout) :: reaclib
+        type(integer_dict), pointer:: rate_dict
+        integer, intent(out) :: ierr
+        integer :: i_rate, nin, nout, ikey, indx, nterms
+        character(len=max_id_length) :: handle
+         
+        if (associated(rate_dict)) call integer_dict_free(rate_dict)
+        reaclib% N_rate_terms(:) = 1
+        do i_rate = 1, reaclib% Nentries
+            nin = nJ_Nin(reaclib% chapter(i_rate))
+            nout = nJ_Nout(reaclib% chapter(i_rate))
+            handle = generate_handle(reaclib% species(:,i_rate), Nin, Nout)
+            ! if we have a new handle, enter the location in the dictionary
+            ! otherwise, increment the N_rate_terms entry
+            call integer_dict_lookup(rate_dict,handle,indx,ikey)
+            if (ikey /= 0) then
+                call integer_dict_define(rate_dict,handle,i_rate,ierr)
+            else
+                reaclib% N_rate_terms(indx) = reaclib% N_rate_terms(indx) + 1
+            end if
+        end do
+        
+        ! now pass through and set N_rate_terms for all terms
+        i_rate = 1
+        do
+            if (i_rate >= reaclib% Nentries) exit
+            nterms = reaclib% N_rate_terms(i_rate)
+            if (reaclib% N_rate_terms(i_rate) > 1) then
+                reaclib% N_rate_terms(i_rate+1:i_rate+nterms-1) =  &
+                & reaclib% N_rate_terms(i_rate)
+            end if
+            i_rate = i_rate+nterms
+        end do
+    end subroutine do_parse_rates
+    
+    function generate_handle(species,nin,nout) result(handle)
+        use netJina_def
+        
+        character(len=iso_name_length),dimension(:),intent(in) :: species
+        integer, intent(in) :: nin, nout
+        character(len=max_id_length) :: handle
+        character(len=2),parameter :: nj = 'nJ'
+        character(len=4),parameter :: sep = '_to_'
+        integer :: i
+        handle = nj
+        do i = 1,nin
+            handle = trim(handle)//adjustl(species(i))
+        end do
+        handle = trim(handle)//sep
+        do i = nin+1,min(nin+nout,size(species))
+            handle = trim(handle)//adjustl(species(i))
+        end do
+    end function generate_handle
+    
 end module reaclib_io

@@ -41,8 +41,8 @@ module netJina_def
     
     ! Nin(chapter), Nout(chapter) give number of nuclides on the entrance and 
     ! exit channels for that chapter
-	integer, dimension(nchapters) :: Nin = (/1,1,1,2,2,2,2,3,3,4,1/)
-	integer, dimension(nchapters) :: Nout = (/1,2,3,1,2,3,4,1,2,2,4/)
+	integer, dimension(nchapters) :: nJ_Nin = (/1,1,1,2,2,2,2,3,3,4,1/)
+	integer, dimension(nchapters) :: nJ_Nout = (/1,2,3,1,2,3,4,1,2,2,4/)
     
 	! storage container for reaclib file
 	type reaclib_data
@@ -54,7 +54,7 @@ module netJina_def
 		character,dimension(:),allocatable :: reverse_flag
 		real(dp),dimension(:),allocatable :: Qvalue
 		real(dp),dimension(:,:),allocatable :: coefficients
-        type(integer_dict), pointer :: reaclib_dict
+        integer,dimension(:),allocatable :: N_rate_terms
 	end type reaclib_data
 
 	! container to hold locations for all terms for a given rate. Reaclib uses a
@@ -77,11 +77,7 @@ contains
 		allocate(r%chapter(n),r%species(max_species_per_reaction,n), &
 		& r%label(n),r%reaction_flag(n), &
 		& r%reverse_flag(n),r%Qvalue(n),r%coefficients(ncoefficients,n), &
-		& stat=ierr)
-!         if (associated(r% reaclib_dict)) then
-!             call integer_dict_free(r% reaclib_dict)
-            nullify(r% reaclib_dict)
-!         end if
+		& r% N_rate_terms(n), stat=ierr)
         r% Nentries = n
 	end subroutine allocate_reaclib_data
 
@@ -94,28 +90,8 @@ contains
 		if (allocated(r% reverse_flag)) deallocate(r% reverse_flag)
 		if (allocated(r% Qvalue)) deallocate(r% Qvalue)
 		if (allocated(r% coefficients)) deallocate(r% coefficients)
-        if (associated(r% reaclib_dict)) call integer_dict_free(r% reaclib_dict)
+		if (allocated(r% N_rate_terms)) deallocate(r% N_rate_terms)
         r% Nentries = 0
 	end subroutine free_reaclib_data
-    
-    subroutine copy_reaclib_data(old_data,new_data,ierr)
-        type(reaclib_data), intent(in) :: old_data
-        type(reaclib_data), intent(out) :: new_data
-        integer, intent(out) :: ierr
-        integer :: n
-        
-        if (new_data% Nentries /= 0) call free_reaclib_data(new_data)
-        call allocate_reaclib_data(new_data,old_data% Nentries, ierr)
-        if (ierr /= 0) return
-        
-        n = old_data% Nentries
-        new_data% chapter(:) = old_data% chapter(1:n)
-		new_data% species(:,:) = old_data% species(:,1:n)
-		new_data% label(:) = old_data% label(1:n)
-		new_data% reaction_flag(:) = old_data% reaction_flag(1:n)
-		new_data% reverse_flag(:) = old_data% reverse_flag(1:n)
-		new_data% Qvalue(:) = old_data% Qvalue(1:n)
-		new_data% coefficients(:,:) = old_data% coefficients(:,1:n)
-    end subroutine copy_reaclib_data
     
 end module netJina_def
