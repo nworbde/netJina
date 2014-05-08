@@ -17,7 +17,11 @@ default: install
 $(TEST_TARGET): $(TEST_OBJS) $(TEST_LIBS)
 	$(LOADER) $(FCopenmp) -o $(TEST_TARGET) $(TEST_OBJS) $(LOAD_LOCAL) $(LOAD_OTHER)
 
-install: $(TEST_TARGET)
+test_bdat: test_bdat.o $(TEST_LIBS)
+	$(LOADER) $(FCopenmp) -o test_bdat test_bdat.o $(LOAD_LOCAL) $(LOAD_OTHER)
+
+
+install: $(TEST_TARGET) test_bdat
 	cp $? $(TEST_DIR)
 
 clean:

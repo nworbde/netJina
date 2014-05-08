@@ -62,4 +62,18 @@ contains
         handle = do_generate_handle(reaclib% species(:,indx), &
         & nJ_Nin(reaclib% chapter(indx)), nJ_Nout(reaclib% chapter(indx)))
     end subroutine get_handle
+    
+    subroutine make_channel_handles(isotope,nuclib,nuclide_dict,handles,ierr)
+        use netJina_def
+        use utils_def
+        use utils_lib
+        use netJina_bdat
+        character(len=iso_name_length), intent(in) :: isotope
+        type(nuclib_data), intent(in) :: nuclib
+        type(integer_dict), pointer :: nuclide_dict
+        character(len=max_id_length),dimension(N_bdat_channels),intent(out) :: &
+        & handles
+        integer, intent(out) :: ierr
+        call do_make_channel_handles(isotope,nuclib,nuclide_dict,handles,ierr)
+    end subroutine make_channel_handles
 end module netJina_lib

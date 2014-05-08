@@ -78,7 +78,7 @@ module netJina_def
     ! flags for reaction channels, bdat-style
 	integer, parameter :: i_pg = 1
     integer, parameter :: i_an = i_pg+1
-	integer, parameter :: i_ag = i_ag+1
+	integer, parameter :: i_ag = i_an+1
 	integer, parameter :: i_ap = i_ag+1
 	integer, parameter :: i_ng = i_ap+1
 	integer, parameter :: i_np = i_ng+1
@@ -89,6 +89,10 @@ module netJina_def
 	integer, parameter :: i_gn = i_pa+1
 	integer, parameter :: i_pn = i_gn+1
     integer, parameter :: N_bdat_channels = i_pn
+    
+    integer,dimension(N_bdat_channels) ::  &
+    & bdat_dZ = [1,2,2,1,0,-1,-1,-2,-2,-1,0,1],  &
+    & bdat_dN = [0,1,2,2,1,1,0,-1,-2,-2,-1,-1]
     
 	! flags for reaction types: r_<number in>_<number out> = chapter id
 	integer, parameter :: &
