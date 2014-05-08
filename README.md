@@ -5,26 +5,49 @@ Tools for working with [JINA reaclib](https://groups.nscl.msu.edu/jina/reaclib/d
 
 *   The code will be a FORTRAN module, and will make use of the `utils` module from [MESA](http://mesa.sourceforge.net).
 
-*   You need to obtain an [reaclib library](https://groups.nscl.msu.edu/jina/reaclib/db/library.php?action=viewsnapshots).  I am using the "default" in "reaclib2" format, with option "include chapters 9, 10, 11". A URL to obtain this snapshot is [https://groups.nscl.msu.edu/jina/reaclib/db/difout.php?action=cfreaclib2&library=default&rateall=1&cached=Daily&no910=0].
+*   The code requires two databases, one containing the nuclide database and the other containing the reaclib database.  These are obtained from the JINA website.  The script `install_data` does this automatically using `curl`.
 
-*   You also need an associated nuclide database.  I am using [winvne_V2.0.dat](https://groups.nscl.msu.edu/jina/reaclib/db/associated_files/Recommended/winvne_v2.0.dat).  The format must be "winvne" -- that is, the extended version with allowance for large values of the partition function.
+## Installation
+
+    ./install_data
+    ./build_and_test
 
 ## How to use (still under development)
 To use, in the top-level code
 
-	call reaclib_init(filename,ratedb,ierr)
-
-where
-
-	! filename 						:= name of reaclib file
-	! ierr 							:= error flag, 0 means init went okay.
-	! ratedb 						:= datastructure holding the reaclib rates
-	
-to load the reaclib database.
+    use netJina_def
+    use netJina_lib
+    
+    type(reaclib_data) :: reaclib
+    type(nuclib_data) :: nuclib
+    integer :: ierr
+    type(integer_dict), pointer :: rates_dict=>null(), nuclide_dict=>null()
+    
+    call netJina_init(datadir,nuclib,nuclide_dict,reaclib,rate_dict,ierr)
+        
+        character(len=*), intent(in) :: datadir
+        ! directory holding the two database files
+        
+        type(nuclib_data), intent(out) :: nuclib
+        ! data storage for nuclide database
+        
+        type(integer_dict), pointer :: nuclide_dict
+        ! dictionary, used to get index of rate
+        
+        type(reaclib_data), intent(out) :: reaclib
+        ! data storage for reaclib database
+        
+        type(integer_dict), pointer :: rate_dict
+        ! dictionary: when called with a handle, it returns the index of the first entry for that rate.
+        ! (reaclib may have more than one entry for a rate, in which case one sums over all rates
+        ! to get the total.)
+        
+        integer, intent(out) :: ierr
+        ! error flag. 0 on exit means success.
 
 Then, to get a rate compatible with bdat-based networks
 
-	call get_rate(ratedb,isotope,rates,n_coeff,q,status,ierr)
+	call get_rate(nuclib,nuclide_dict,reaclib,rate_dict,isotope,rates,n_coeff,q,status,ierr)
 	
 where
 

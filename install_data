@@ -1,11 +1,38 @@
 #!/bin/bash
 
+function check_okay {
+    if [ $? -ne 0 ]; then
+        echo
+        pwd
+        echo "FAILED"
+        echo
+        exit 1
+    fi
+}
+
 mkdir -p data
-echo "getting reaclib"
+check_okay
+echo "fetching reaclib datafile from https://groups.nscl.msu.edu/jina/reaclib/db/reaclibs/20140508default2.gz
+"
 cd data
-curl -o reaclib_db.gz https://groups.nscl.msu.edu/jina/reaclib/db/reaclibs/20140508default2.gz
+curl -o tmp_reaclib_db.gz https://groups.nscl.msu.edu/jina/reaclib/db/reaclibs/20140508default2.gz
+check_okay
+
 echo "unpacking data"
-gunzip reaclib_db.gz
-echo "getting winvn file"
-curl -o nuclide_db     https://groups.nscl.msu.edu/jina/reaclib/db/associated_files/Recommended/winvne_v2.0.dat
+gunzip tmp_reaclib_db.gz
+check_okay
+
+# now copy to final location, prompt if overwrite
+cp -i tmp_reaclib_db reaclib_db
+
+echo "fetching nuclib from https://groups.nscl.msu.edu/jina/reaclib/db/associated_files/Recommended/winvne_v2.0.dat
+"
+curl -o tmp_nuclide_db     https://groups.nscl.msu.edu/jina/reaclib/db/associated_files/Recommended/winvne_v2.0.dat
+check_okay
+
+# now copy to final location, prompt if overwrite
+cp -i tmp_nuclide_db nuclide_db
+echo "done"
+echo
+
 cd ..
