@@ -13,7 +13,8 @@ contains
     subroutine load_reaclib(filename,reaclib,rate_dict,ierr)
         use iso_fortran_env, only: error_unit
         use netJina_def
-        use reaclib_io
+        use netJina_io
+        use netJina_storage
         use utils_lib, only: integer_dict_size
         
         character(len=*), intent(in) :: filename
@@ -35,7 +36,7 @@ contains
 
     subroutine get_handle(reaclib,indx,handle)
         use netJina_def, only: reaclib_data, nJ_Nin, nJ_Nout, max_id_length
-        use reaclib_io, only: do_generate_handle
+        use netJina_io, only: do_generate_handle
         
         type(reaclib_data), intent(in) :: reaclib
         integer, intent(in) :: indx

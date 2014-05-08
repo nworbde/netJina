@@ -6,7 +6,7 @@
 !   Requires installation of MESA (mesa.sourceforge.net) utils lib, v 6022
 !
 
-module reaclib_io
+module netJina_io
 
     ! the reaclib v2 data format
 	character(len=*), parameter :: reaclib_line0 = '(i2)'
@@ -20,6 +20,7 @@ contains
     subroutine do_load_reaclib(filename,rates,ierr)
     	use, intrinsic :: iso_fortran_env, only: iostat_end, error_unit
     	use netJina_def
+        use netJina_storage
         use utils_lib, only: alloc_iounit
         
     	character(len=*), intent(in) :: filename
@@ -165,4 +166,4 @@ contains
         end do
     end function do_generate_handle
     
-end module reaclib_io
+end module netJina_io
