@@ -77,13 +77,14 @@ module netJina_def
     
     ! flags for reaction channels, bdat-style
 	integer, parameter :: i_pg = 1
-	integer, parameter :: i_ag = i_pg+1
+    integer, parameter :: i_an = i_pg+1
+	integer, parameter :: i_ag = i_ag+1
 	integer, parameter :: i_ap = i_ag+1
 	integer, parameter :: i_ng = i_ap+1
 	integer, parameter :: i_np = i_ng+1
 	integer, parameter :: i_gp = i_np+1
-	integer, parameter :: i_an = i_gp+1
-	integer, parameter :: i_ga = i_an+1
+	integer, parameter :: i_na = i_gp+1
+	integer, parameter :: i_ga = i_na+1
 	integer, parameter :: i_pa = i_ga+1
 	integer, parameter :: i_gn = i_pa+1
 	integer, parameter :: i_pn = i_gn+1
