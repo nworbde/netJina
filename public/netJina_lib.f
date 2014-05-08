@@ -14,6 +14,8 @@ contains
         use iso_fortran_env, only: error_unit
         use netJina_def
         use reaclib_io
+        use utils_lib, only: integer_dict_size
+        
         character(len=*), intent(in) :: filename
         type(reaclib_data), intent(out) :: reaclib
         type(integer_dict), pointer :: rate_dict
@@ -22,11 +24,13 @@ contains
         ierr = 0
         if (reaclib% Nentries /= 0) call free_reaclib_data(reaclib)
         
-        write(error_unit,*) 'loading reaclib from '//trim(filename)//'...'
+        write(error_unit,'(a)') 'loading reaclib from '//trim(filename)//'...'
         call do_load_reaclib(filename,reaclib,ierr)
-        write(error_unit,*) 'done. writing reaction dictionary...'
+        write(error_unit,'(a,i0,a)') 'done. ',reaclib% Nentries, &
+        & ' entries retrieved. now writing reaction dictionary...'
         call do_parse_rates(reaclib,rate_dict,ierr)
-        
+        write(error_unit,'(a,i0,a)') 'done. ',integer_dict_size(rate_dict), &
+        & ' unique rates found.'
     end subroutine load_reaclib
 
     subroutine get_handle(reaclib,indx,handle)

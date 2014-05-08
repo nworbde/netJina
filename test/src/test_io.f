@@ -14,14 +14,15 @@ program test_io
     
     call load_reaclib(reaclib_file,reaclib,rates_dict,ierr)
     
-    ! write the first 50 entries of chapter 5
     if (ierr == 0) then
         do i = 1,reaclib% Nentries
             if (reaclib% chapter(i) == 5) exit
         end do
         if (reaclib% chapter(i) == 5) then
+            write(output_unit,'(a)') 'Here are the first 50 entries of chapter 5'
             do j = i,i+50
-                write(output_unit,'(a,a,"==>",a,a)') reaclib% species(1:4,j)
+                write(output_unit,'(a5,a5," ==> ",a5,a5)')  &
+                & reaclib% species(1:4,j)
             end do
         else
             write(error_unit,'(a)') 'unable to find reactions in chapter 5'
@@ -32,15 +33,15 @@ program test_io
     max_terms = maxval(reaclib% N_rate_terms)
     indx = maxloc(reaclib% N_rate_terms)
     
-    write(output_unit,*) 'reaction: ',reaclib% species(:,indx(1))
-    write(output_unit,*) 'has ',max_terms,' terms'
+    write(output_unit,*) 'reaction: ',reaclib% species(:,indx(1)),  &
+    & 'has ',max_terms,' terms'
     
     call get_handle(reaclib,indx(1),handle)
     call integer_dict_lookup(rates_dict,handle,dindx,ierr)
     if (ierr == 0) then
-        print *, 'rates_dict returns ',dindx,' for rate head.'
         do i = dindx, dindx+max_terms-1
-            print *,reaclib% species(:,i),reaclib% N_rate_terms(i)
+            write(output_unit,'(i5,tr1,6a5,tr2,7es12.4)')  &
+            & i,reaclib% species(:,i),reaclib% coefficients(:,i)
         end do
     end if
 end program test_io

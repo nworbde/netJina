@@ -62,7 +62,6 @@ contains
     		count = count + 1
     	end do
     	close(reaclib_unitno)
-        write(error_unit,*) 'received ',count,' entries'
     	tmp_rates%  Nentries = count
                 
         call copy_reaclib_data(tmp_rates,rates,ierr)
