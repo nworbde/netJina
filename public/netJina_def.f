@@ -78,10 +78,10 @@ contains
 		& r%label(n),r%reaction_flag(n), &
 		& r%reverse_flag(n),r%Qvalue(n),r%coefficients(ncoefficients,n), &
 		& stat=ierr)
-        if (associated(r% reaclib_dict)) then
-            call integer_dict_free(r% reaclib_dict)
+!         if (associated(r% reaclib_dict)) then
+!             call integer_dict_free(r% reaclib_dict)
             nullify(r% reaclib_dict)
-        end if
+!         end if
         r% Nentries = n
 	end subroutine allocate_reaclib_data
 
@@ -97,5 +97,25 @@ contains
         if (associated(r% reaclib_dict)) call integer_dict_free(r% reaclib_dict)
         r% Nentries = 0
 	end subroutine free_reaclib_data
+    
+    subroutine copy_reaclib_data(old_data,new_data,ierr)
+        type(reaclib_data), intent(in) :: old_data
+        type(reaclib_data), intent(out) :: new_data
+        integer, intent(out) :: ierr
+        integer :: n
+        
+        if (new_data% Nentries /= 0) call free_reaclib_data(new_data)
+        call allocate_reaclib_data(new_data,old_data% Nentries, ierr)
+        if (ierr /= 0) return
+        
+        n = old_data% Nentries
+        new_data% chapter(:) = old_data% chapter(1:n)
+		new_data% species(:,:) = old_data% species(:,1:n)
+		new_data% label(:) = old_data% label(1:n)
+		new_data% reaction_flag(:) = old_data% reaction_flag(1:n)
+		new_data% reverse_flag(:) = old_data% reverse_flag(1:n)
+		new_data% Qvalue(:) = old_data% Qvalue(1:n)
+		new_data% coefficients(:,:) = old_data% coefficients(:,1:n)
+    end subroutine copy_reaclib_data
     
 end module netJina_def

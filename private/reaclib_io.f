@@ -26,40 +26,49 @@ contains
     	type(reaclib_data), intent(out) :: rates
     	integer, intent(out) :: ierr
     	integer :: i, reaclib_unitno, count, iend
+        type(reaclib_data) :: tmp_rates
 
     	ierr = 0
         reaclib_unitno = alloc_iounit(ierr)
         if (failure('allocating iounit',ierr)) return
         
-    	open(unit=reaclib_unitno, file=trim(filename), iostat=ierr, status="old", action="read")
+    	open(unit=reaclib_unitno, file=trim(filename), iostat=ierr, &
+    	& status="old", action="read")
         if (failure('opening'//trim(filename),ierr)) return
 
     	! allocate a temporary to hold the library
-    	call allocate_reaclib_data(rates,max_nreaclib,ierr)
+    	call allocate_reaclib_data(tmp_rates,max_nreaclib,ierr)
         if (failure('allocating storage',ierr)) return
 
     	count = 0
     	do i = 1, max_nreaclib
-    		read(unit=reaclib_unitno, fmt=reaclib_line0, iostat=iend) rates%chapter(i)
+    		read(unit=reaclib_unitno, fmt=reaclib_line0, iostat=iend) &
+    		& tmp_rates% chapter(i)
     		if (iend == iostat_end ) exit 
     		read(unit=reaclib_unitno,fmt=reaclib_line1,iostat=ierr) &
-    		& rates%species(:,i), rates%label(i), rates%reaction_flag(i), &
-    		& rates%reverse_flag(i),rates%Qvalue(i)
+    		& tmp_rates% species(:,i), tmp_rates% label(i),  &
+    		& tmp_rates% reaction_flag(i), &
+    		& tmp_rates% reverse_flag(i),tmp_rates% Qvalue(i)
             if (failure('reading line 1/3',ierr)) return
     		
             read(unit=reaclib_unitno,fmt=reaclib_line2,iostat=ierr) &
-    	    & rates%coefficients(1:4,i)
+    	    & tmp_rates% coefficients(1:4,i)
             if (failure('reading line 2/3',ierr)) return
     		
             read(unit=reaclib_unitno,fmt=reaclib_line3,iostat=ierr) &
-    		& rates%coefficients(5:7,i)
+    		& tmp_rates% coefficients(5:7,i)
             if (failure('reading line 3/3',ierr)) return
     		
     		count = count + 1
     	end do
     	close(reaclib_unitno)
         write(error_unit,*) 'received ',count,' entries'
-    	rates% Nentries = count
+    	tmp_rates%  Nentries = count
+                
+        call copy_reaclib_data(tmp_rates,rates,ierr)
+        if (failure('copying reaclib data',ierr)) return
+        
+        call free_reaclib_data(tmp_rates)
         
     contains
         function failure(action,ierr)
