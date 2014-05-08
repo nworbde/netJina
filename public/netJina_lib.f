@@ -29,4 +29,14 @@ contains
         
     end subroutine load_reaclib
 
+    subroutine get_handle(reaclib,indx,handle)
+        use netJina_def, only: reaclib_data, nJ_Nin, nJ_Nout, max_id_length
+        use reaclib_io, only: generate_handle
+        
+        type(reaclib_data), intent(in) :: reaclib
+        integer, intent(in) :: indx
+        character(len=max_id_length), intent(out) :: handle
+        handle = generate_handle(reaclib% species(:,indx), &
+        & nJ_Nin(reaclib% chapter(indx)), nJ_Nout(reaclib% chapter(indx)))
+    end subroutine get_handle
 end module netJina_lib

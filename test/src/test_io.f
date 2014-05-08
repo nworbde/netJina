@@ -2,13 +2,15 @@ program test_io
     use iso_fortran_env, only: output_unit, error_unit
     use netJina_def
     use netJina_lib
+    use utils_lib
     
     character(len=*), parameter :: reaclib_file = '../data/20140507default2'
     type(reaclib_data) :: reaclib
     integer :: ierr
     integer :: i,j
     type(integer_dict), pointer :: rates_dict=>null()
-    integer :: max_terms, indx(1)
+    integer :: max_terms, indx(1), dindx
+    character(len=max_id_length) :: handle
     
     call load_reaclib(reaclib_file,reaclib,rates_dict,ierr)
     
@@ -33,4 +35,12 @@ program test_io
     write(output_unit,*) 'reaction: ',reaclib% species(:,indx(1))
     write(output_unit,*) 'has ',max_terms,' terms'
     
+    call get_handle(reaclib,indx(1),handle)
+    call integer_dict_lookup(rates_dict,handle,dindx,ierr)
+    if (ierr == 0) then
+        print *, 'rates_dict returns ',dindx,' for rate head.'
+        do i = dindx, dindx+max_terms-1
+            print *,reaclib% species(:,i),reaclib% N_rate_terms(i)
+        end do
+    end if
 end program test_io
