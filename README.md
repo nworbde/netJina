@@ -5,7 +5,7 @@ Tools for working with [JINA reaclib](https://groups.nscl.msu.edu/jina/reaclib/d
 
 *   The code will be a FORTRAN module, and will make use of the `utils` module from [MESA](http://mesa.sourceforge.net).
 
-*   You need to obtain an [reaclib library](https://groups.nscl.msu.edu/jina/reaclib/db/library.php?action=viewsnapshots).  I am using the "default" in "reaclib2" format, with option "include chapters 9, 10, 11".
+*   You need to obtain an [reaclib library](https://groups.nscl.msu.edu/jina/reaclib/db/library.php?action=viewsnapshots).  I am using the "default" in "reaclib2" format, with option "include chapters 9, 10, 11". A URL to obtain this snapshot is [https://groups.nscl.msu.edu/jina/reaclib/db/difout.php?action=cfreaclib2&library=default&rateall=1&cached=Daily&no910=0].
 
 *   You also need an associated nuclide database.  I am using [winvne_V2.0.dat](https://groups.nscl.msu.edu/jina/reaclib/db/associated_files/Recommended/winvne_v2.0.dat).  The format must be "winvne" -- that is, the extended version with allowance for large values of the partition function.
 
