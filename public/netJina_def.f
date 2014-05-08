@@ -7,6 +7,7 @@
 !
 
 module netJina_def
+    use const_def, only: sp,dp
     use utils_def, only: integer_dict
 
     ! reaclib uses a character handle for each isotope
@@ -50,8 +51,8 @@ module netJina_def
 		character(len=iso_name_length),dimension(:),allocatable :: label
 		character,dimension(:),allocatable :: reaction_flag
 		character,dimension(:),allocatable :: reverse_flag
-		real,dimension(:),allocatable :: Qvalue
-		real,dimension(:,:),allocatable :: coefficients
+		real(dp),dimension(:),allocatable :: Qvalue
+		real(dp),dimension(:,:),allocatable :: coefficients
         type(integer_dict), pointer :: reaclib_dict
 	end type reaclib_data
 
@@ -76,7 +77,7 @@ contains
 		& r%label(n),r%reaction_flag(n), &
 		& r%reverse_flag(n),r%Qvalue(n),r%coefficients(ncoefficients,n), &
 		& stat=ierr)
-        if (associate(r% reaclib_dict)) then
+        if (associated(r% reaclib_dict)) then
             call integer_dict_free(r% reaclib_dict)
             nullify(r% reaclib_dict)
         end if
@@ -92,7 +93,7 @@ contains
 		if (allocated(r% reverse_flag)) deallocate(r% reverse_flag)
 		if (allocated(r% Qvalue)) deallocate(r% Qvalue)
 		if (allocated(r% coefficients)) deallocate(r% coefficients)
-        if (associated(r% reaclib_data)) call integer_dict_free(r% reaclib_dict)
+        if (associated(r% reaclib_dict)) call integer_dict_free(r% reaclib_dict)
         r% Nentries = 0
 	end subroutine free_reaclib_data
     

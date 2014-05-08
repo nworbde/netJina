@@ -25,7 +25,7 @@ contains
     	character(len=*), intent(in) :: filename
     	type(reaclib_data), intent(out) :: rates
     	integer, intent(out) :: ierr
-    	integer :: i, count, iend
+    	integer :: i, reaclib_unitno, count, iend
 
     	ierr = 0
         reaclib_unitno = alloc_iounit(ierr)
@@ -40,18 +40,18 @@ contains
 
     	count = 0
     	do i = 1, max_nreaclib
-    		read(unit=reaclib_unitno, fmt=line0, iostat=iend) rates%chapter(i)
+    		read(unit=reaclib_unitno, fmt=reaclib_line0, iostat=iend) rates%chapter(i)
     		if (iend == iostat_end ) exit 
-    		read(unit=reaclib_unitno,fmt=line1,iostat=ierr) &
+    		read(unit=reaclib_unitno,fmt=reaclib_line1,iostat=ierr) &
     		& rates%species(:,i), rates%label(i), rates%reaction_flag(i), &
     		& rates%reverse_flag(i),rates%Qvalue(i)
             if (failure('reading line 1/3',ierr)) return
     		
-            read(unit=reaclib_unitno,fmt=line2,iostat=ierr) &
+            read(unit=reaclib_unitno,fmt=reaclib_line2,iostat=ierr) &
     	    & rates%coefficients(1:4,i)
             if (failure('reading line 2/3',ierr)) return
     		
-            read(unit=reaclib_unitno,fmt=line3,iostat=ierr) &
+            read(unit=reaclib_unitno,fmt=reaclib_line3,iostat=ierr) &
     		& rates%coefficients(5:7,i)
             if (failure('reading line 3/3',ierr)) return
     		
