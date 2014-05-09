@@ -12,10 +12,10 @@ function check_okay {
 
 mkdir -p data
 check_okay
-echo "fetching reaclib datafile from https://groups.nscl.msu.edu/jina/reaclib/db/reaclibs/20140508default2.gz
+echo "fetching reaclib datafile from https://dl.dropboxusercontent.com/u/52649885/netJina/reaclib_db.gz
 "
 cd data
-curl -o tmp_reaclib_db.gz https://groups.nscl.msu.edu/jina/reaclib/db/reaclibs/20140508default2.gz
+curl -o tmp_reaclib_db.gz https://dl.dropboxusercontent.com/u/52649885/netJina/reaclib_db.gz
 check_okay
 
 echo "unpacking data"
@@ -25,9 +25,13 @@ check_okay
 # now move to final location, prompt if overwrite
 mv -i tmp_reaclib_db reaclib_db
 
-echo "fetching nuclib from https://groups.nscl.msu.edu/jina/reaclib/db/associated_files/Recommended/winvne_v2.0.dat
+echo "fetching nuclib from https://dl.dropboxusercontent.com/u/52649885/netJina/nuclide_db.gz
 "
-curl -o tmp_nuclide_db     https://groups.nscl.msu.edu/jina/reaclib/db/associated_files/Recommended/winvne_v2.0.dat
+curl -o tmp_nuclide_db.gz     https://dl.dropboxusercontent.com/u/52649885/netJina/nuclide_db.gz
+check_okay
+
+echo "unpacking data"
+gunzip tmp_nuclide_db.gz
 check_okay
 
 # now move to final location, prompt if overwrite
