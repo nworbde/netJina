@@ -28,3 +28,7 @@ cd ..
 ./tester |tee test_output
 check_okay
 cd ..
+echo "finished"
+echo
+echo "compare test/test_output with test/sample output"
+echo

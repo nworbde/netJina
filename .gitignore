@@ -3,4 +3,4 @@ data
 *.o
 *.mod
 tester
-test_bdat
+test_output
