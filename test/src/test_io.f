@@ -101,5 +101,14 @@ program test_io
         & trim(handles(i)),q(i),rate_mask(i),n_coeff(i)
     end do
     write(output_unit,'(54("_"))')
+ 
+    write(output_unit,'(/,a)')  &
+    & 'What are the reaction coefficients for ca37(g,p)k36?'
+    write(output_unit,'(7(es12.4))') rate_coefficients(1:49,i_gp)
+
+    write(output_unit,'(/,a)')  &
+    & 'What are the reaction coefficients for ca37(n,a)ar34?'
+    write(output_unit,'(7(es12.4))') rate_coefficients(1:7,i_na)
+
     
 end program test_io
