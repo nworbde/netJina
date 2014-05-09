@@ -163,6 +163,9 @@ contains
             if (io_failure('reading line 3/3',ierr)) return
     		
     		count = count + 1
+            if (mod(count,1000) == 0)  &
+            & write (error_unit,'(a)',advance='no') '.'
+            
     	end do
     	close(reaclib_unitno)
     	tmp_rates%  Nentries = count

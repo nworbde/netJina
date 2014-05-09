@@ -34,7 +34,7 @@ contains
 
         ierr = 0
         write(error_unit,'(a)')  &
-        & 'loading nuclib from '//trim(nuclib_filename)//'...'        
+        & 'loading nuclib from '//trim(nuclib_filename)
         call do_load_nuclib(nuclib_filename,nuclib,ierr)
         write(error_unit,'(/,a,i0,a)')  &
         & 'done. ',nuclib% Nnuclides, &
@@ -43,7 +43,7 @@ contains
         write(error_unit,'(a//)') 'done.'
         
         write(error_unit,'(a)')  &
-        & 'loading reaclib from '//trim(reaclib_filename)//'...'
+        & 'loading reaclib from '//trim(reaclib_filename)
         call do_load_reaclib(reaclib_filename,reaclib,ierr)
         write(error_unit,'(a,i0,a)') 'done. ',reaclib% Nentries, &
         & ' entries retrieved. now writing reaction dictionary...'
