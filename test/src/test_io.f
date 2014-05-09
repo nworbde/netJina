@@ -16,6 +16,11 @@ program test_io
     character(len=max_id_length) :: handle
     character(len=iso_name_length) :: iso
     character(len=max_id_length),dimension(N_bdat_channels) :: handles
+    integer, dimension(N_bdat_channels) :: n_coeff
+    real(dp), dimension(ncoefficients*max_terms_per_rate,N_bdat_channels) :: &
+    & rate_coefficients
+    real(dp), dimension(N_bdat_channels) :: q
+    logical, dimension(N_bdat_channels) :: rate_mask
     
     call netJina_init(datadir,nuclib,nuclide_dict,reaclib,rates_dict,ierr)
     if (ierr /= 0) then
@@ -68,9 +73,9 @@ program test_io
             & i,reaclib% species(:,i),reaclib% coefficients(:,i)
         end do
     end if
-    
-    write (output_unit,'(/,a)') 'What are the reaction channels for fe56?'
-    iso = 'fe56'
+
+    write (output_unit,'(/,a)') 'What are the reaction channels for ca37?'
+    iso = 'ca37'
     call make_channel_handles(iso,nuclib,nuclide_dict,handles,ierr)
     write(output_unit,'(54("_"),/,a2,tr2,a24,tr2,a24,/,54("="))')  &
     & 'id','handle','reaction'
@@ -83,6 +88,17 @@ program test_io
         else
             write (output_unit,*) i,trim(handles(i)), 'rate not found'
         end if
+    end do
+    write(output_unit,'(54("_"))')
+
+    write(output_unit,'(/,a)') 'What are the reaction parameters for ca37'
+    call get_bdat_channels(reaclib,rates_dict, &
+    & handles,n_coeff,rate_coefficients,q,rate_mask)
+    write(output_unit,'(54("_"),/,a24,tr2,a10,tr2,a4,tr2,a7,/,54("="))') &
+    & 'handle','q-value','mask','N terms'
+    do i=1, N_bdat_channels
+        write (output_unit,'(a24,tr2,f10.4,tr2,l4,tr2,i7)') &
+        & trim(handles(i)),q(i),rate_mask(i),n_coeff(i)
     end do
     write(output_unit,'(54("_"))')
     

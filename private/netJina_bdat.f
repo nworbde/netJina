@@ -1,6 +1,42 @@
 module netJina_bdat
 
 contains
+    
+    subroutine do_get_bdat_channels(reaclib,rates_dict, &
+    & handles,n_coeff,rate_coefficients,q,rate_mask)
+        use utils_def, only: integer_dict
+        use utils_lib, only: integer_dict_lookup
+        use netJina_def
+        
+        type(reaclib_data), intent(in) :: reaclib
+        type(integer_dict), pointer :: rates_dict
+        character(len=max_id_length), intent(in),  &
+        & dimension(N_bdat_channels) :: handles
+        integer, intent(out), dimension(N_bdat_channels) :: n_coeff
+        real(dp), dimension(ncoefficients*max_terms_per_rate,N_bdat_channels), &
+        & intent(out) :: rate_coefficients
+        real(dp), intent(out), dimension(N_bdat_channels) :: q
+        logical, intent(out), dimension(N_bdat_channels) :: rate_mask
+        integer :: ierr
+        integer :: i, indx, istart, iend
+
+        ierr = 0
+        do i = 1, N_bdat_channels
+            call integer_dict_lookup(rates_dict,trim(handles(i)),indx,ierr)
+            if (ierr /= 0) then
+                rate_mask(i) = .FALSE.
+                cycle
+            end if
+            q(i) = reaclib% Qvalue(indx)
+            n_coeff(i) = reaclib% N_rate_terms(indx)*ncoefficients
+            istart = indx
+            iend = istart + reaclib% N_rate_terms(indx) - 1
+            rate_coefficients(1:n_coeff(i),i) =  reshape( &
+            & reaclib% coefficients(1:ncoefficients,istart:iend),[n_coeff(i)])
+            rate_mask(i) = (reaclib% reverse_flag(indx) /= 'v')
+        end do
+    end subroutine do_get_bdat_channels
+    
     subroutine do_make_channel_handles(isotope,nuclib,nuclide_dict,handles,ierr)
         use netJina_def
         use utils_def

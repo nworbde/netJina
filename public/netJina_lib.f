@@ -98,6 +98,28 @@ contains
 		partition_fcn = nuclib% pfcn(:,indx)
     end subroutine get_nuclide_properties
 
+    subroutine get_bdat_channels(reaclib,rates_dict, &
+    & handles,n_coeff,rate_coefficients,q,rate_mask)
+        use utils_def, only: integer_dict
+        use utils_lib, only: integer_dict_lookup
+        use netJina_def
+        use netJina_bdat, only: do_get_bdat_channels
+        
+        type(reaclib_data), intent(in) :: reaclib
+        type(integer_dict), pointer :: rates_dict
+        character(len=max_id_length), intent(in),  &
+        & dimension(N_bdat_channels) :: handles
+        integer, intent(out), dimension(N_bdat_channels) :: n_coeff
+        real(dp), dimension(ncoefficients*max_terms_per_rate,N_bdat_channels), &
+        & intent(out) :: rate_coefficients
+        real(dp), intent(out), dimension(N_bdat_channels) :: q
+        logical, intent(out), dimension(N_bdat_channels) :: rate_mask
+        
+        call do_get_bdat_channels(reaclib,rates_dict, &
+        & handles,n_coeff,rate_coefficients,q,rate_mask)
+        
+    end subroutine get_bdat_channels
+
     subroutine get_handle(reaclib,indx,handle)
         use netJina_def, only: reaclib_data, nJ_Nin, nJ_Nout, max_id_length
         use netJina_io, only: do_generate_handle

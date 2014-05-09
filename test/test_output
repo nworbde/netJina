@@ -101,20 +101,38 @@ What reaction has the most terms?
  7734  ca37    p  k36                   3.1989E+01 -4.6546E+01  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
  7735  ca37    p  k36                  -1.4419E+01 -3.5811E+01  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 
-What are the reaction channels for fe56?
+What are the reaction channels for ca37?
 ______________________________________________________
 id                    handle                  reaction
 ======================================================
- 1         nJ_p_fe56_to_co57         p + fe56 ==> co57
- 2     nJ_he4_fe56_to_n_ni59   he4 + fe56 ==> n + ni59
- 3       nJ_he4_fe56_to_ni60       he4 + fe56 ==> ni60
- 4     nJ_he4_fe56_to_p_co59   he4 + fe56 ==> p + co59
- 5         nJ_n_fe56_to_fe57         n + fe56 ==> fe57
- 6       nJ_n_fe56_to_p_mn56     n + fe56 ==> p + mn56
- 7         nJ_fe56_to_p_mn55         fe56 ==> p + mn55
- 8     nJ_n_fe56_to_he4_cr53   n + fe56 ==> he4 + cr53
- 9       nJ_fe56_to_he4_cr52       fe56 ==> he4 + cr52
-10     nJ_p_fe56_to_he4_mn53   p + fe56 ==> he4 + mn53
-11         nJ_fe56_to_n_fe55         fe56 ==> n + fe55
-12       nJ_p_fe56_to_n_co56     p + fe56 ==> n + co56
+ 1         nJ_p_ca37_to_sc38         p + ca37 ==> sc38
+ 2     nJ_he4_ca37_to_n_ti40   he4 + ca37 ==> n + ti40
+ 3       nJ_he4_ca37_to_ti41       he4 + ca37 ==> ti41
+ 4     nJ_he4_ca37_to_p_sc40   he4 + ca37 ==> p + sc40
+ 5         nJ_n_ca37_to_ca38         n + ca37 ==> ca38
+ 6        nJ_n_ca37_to_p_k37      n + ca37 ==> p + k37
+ 7          nJ_ca37_to_p_k36          ca37 ==> p + k36
+ 8     nJ_n_ca37_to_he4_ar34   n + ca37 ==> he4 + ar34
+ 9       nJ_ca37_to_he4_ar33       ca37 ==> he4 + ar33
+10      nJ_p_ca37_to_he4_k34    p + ca37 ==> he4 + k34
+11         nJ_ca37_to_n_ca36         ca37 ==> n + ca36
+12       nJ_p_ca37_to_n_sc37     p + ca37 ==> n + sc37
+______________________________________________________
+
+What are the reaction parameters for ca37
+______________________________________________________
+                  handle     q-value  mask  N terms
+======================================================
+       nJ_p_ca37_to_sc38     -0.9097     T        7
+   nJ_he4_ca37_to_n_ti40     -9.9318     F        7
+     nJ_he4_ca37_to_ti41      4.9892     T        7
+   nJ_he4_ca37_to_p_sc40      2.5235     T        7
+       nJ_n_ca37_to_ca38     16.9941     T        7
+      nJ_n_ca37_to_p_k37     12.4468     T        7
+        nJ_ca37_to_p_k36     -3.0230     F       49
+   nJ_n_ca37_to_he4_ar34     10.8879     T        7
+     nJ_ca37_to_he4_ar33     -6.1765     F        7
+    nJ_p_ca37_to_he4_k34     -6.7906     F        7
+       nJ_ca37_to_n_ca36    -14.7677     F        7
+     nJ_p_ca37_to_n_sc37    -16.7590     F        7
 ______________________________________________________

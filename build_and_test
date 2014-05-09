@@ -12,7 +12,7 @@ function check_okay {
 }
 
 # check that data files exist
-if [[ -f data/reaclib_db && -f data/nuclide_db ]]; then
+if [[ -f data/reaclib_db && -f data/nuclib_db ]]; then
     echo "nuclib and reaclib databases exist"
 else
     echo "I require the nuclib and reaclib databases; fetching them now"
