@@ -24,7 +24,7 @@ program test_io
     
     call netJina_init(datadir,nuclib,nuclide_dict,reaclib,rates_dict,ierr)
     if (ierr /= 0) then
-        write(error_unit,*) 'load reaclib returned error ',ierr
+        write(error_unit,*) 'failure in initialization ',ierr
         stop
     end if
     
