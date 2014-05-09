@@ -18,6 +18,6 @@ cd ../test/make
 make
 check_okay
 cd ..
-./tester
+./tester |tee test_output
 check_okay
 cd ..

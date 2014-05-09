@@ -27,12 +27,14 @@ module netJina_def
 	integer, parameter :: max_species_per_reaction=6
 	integer, parameter :: ncoefficients=7
 	integer, parameter :: nchapters=11
-	integer, parameter :: max_terms_per_rate = 20
+	integer, parameter :: max_terms_per_rate = 12
     ! we keep track of reactions using a unique "handle" generated from the 
     ! isotope names
 	integer, parameter :: max_id_length = 42
     ! max. Z in the nucchem database
 	integer, parameter :: max_element_z = 112
+    ! used to output a formatted reaction string
+    integer, parameter :: length_reaction_string = 45
     
     ! table of elements; note that hydrogen is referred to as 'p' in the table 
     ! and neutrons are referred to as 'n'

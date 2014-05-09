@@ -52,6 +52,52 @@ contains
         & ' unique rates found.'
     end subroutine netJina_init
 
+    subroutine get_nuclide_properties(nuclide, nuclib, nuclide_dict, &
+            & A,Z,N,S,E,partition_fcn,provenance,ierr)
+        use iso_fortran_env, only: error_unit
+        use netJina_def
+        use utils_lib, only: integer_dict_lookup
+
+        character(len=iso_name_length), intent(in) :: nuclide
+        type(nuclib_data), intent(in) :: nuclib
+        type(integer_dict), pointer :: nuclide_dict
+        real(dp), intent(out) :: A
+        integer, intent(out) :: Z,N
+        real(dp), intent(out) :: S,E
+        real(dp), dimension(npfcn), intent(out) :: partition_fcn
+        character(len=provenance_length), intent(out) :: provenance
+        integer, intent(out) :: ierr
+        integer :: indx
+        
+        A = 0.0
+        Z = 0
+        N = 0
+        S = 0.0
+        E = 0.0
+        partition_fcn = 0.0
+        provenance = ''
+        
+        call integer_dict_lookup(nuclide_dict,trim(nuclide),indx,ierr)
+        if (ierr /= 0) then
+            write(error_unit,'(a)') 'unable to find '//nuclide//' in database.'
+            return
+        end if
+        
+        ! debugging
+        if (trim(nuclib% name(indx)) /= trim(nuclide)) then
+            write(error_unit,'(a)') 'got the wrong nucleus'
+            return
+        end if
+        
+        provenance = nuclib% provenance(indx)
+		A = nuclib% A(indx)
+		Z = nuclib% Z(indx)
+		N = nuclib% N(indx)
+		S = nuclib% spin(indx)
+		E = nuclib% mass_excess(indx)
+		partition_fcn = nuclib% pfcn(:,indx)
+    end subroutine get_nuclide_properties
+
     subroutine get_handle(reaclib,indx,handle)
         use netJina_def, only: reaclib_data, nJ_Nin, nJ_Nout, max_id_length
         use netJina_io, only: do_generate_handle
@@ -76,4 +122,61 @@ contains
         integer, intent(out) :: ierr
         call do_make_channel_handles(isotope,nuclib,nuclide_dict,handles,ierr)
     end subroutine make_channel_handles
+    
+    function reaction_string(reaclib,indx) result(str)
+        use netJina_def
+        type(reaclib_data), intent(in) :: reaclib
+        integer, intent(in) :: indx
+        character(len=length_reaction_string) :: str
+        character(len=length_reaction_string) :: str_nxt
+        
+        str_nxt = ''
+    	select case(reaclib% chapter(indx))
+    		case(r_one_one)
+    	   	call write_n_to_m(1,1)
+    		case(r_one_two)
+    	  	call write_n_to_m(1,2)
+    		case(r_one_three)
+    	  	call write_n_to_m(1,3)
+    		case(r_two_one)
+    	  	call write_n_to_m(2,1)
+    		case(r_two_two)
+    	  	call write_n_to_m(2,2)
+    		case(r_two_three)
+    	  	call write_n_to_m(2,3)
+    		case(r_two_four)
+    	  	call write_n_to_m(2,4)
+    		case(r_three_one)
+    	  	call write_n_to_m(3,1)
+    		case(r_three_two)
+    	  	call write_n_to_m(3,2)
+    		case(r_four_two)
+    	  	call write_n_to_m(4,2)
+    		case(r_one_four)
+    	  	call write_n_to_m(1,4)
+    	end select
+        
+        str = str_nxt
+    
+    contains
+    	subroutine write_n_to_m(n,m)
+          	integer, intent(in) :: n, m
+           	integer :: j
+            do j = 1,n-1
+                str_nxt = trim(str_nxt)//' '// &
+                & trim(adjustl(reaclib% species(j, indx)))//' +'
+        	end do
+            str_nxt = trim(str_nxt)//' '// &
+            & trim(adjustl(reaclib% species(n,indx)))//' ==>'
+        	do j=n+1,n+m-1
+        	    str_nxt = trim(str_nxt)//' '// &
+        	    & trim(adjustl(reaclib% species(j, indx))) &
+        	    & //' +' 
+        	end do
+            str_nxt = trim(str_nxt)//' '// &
+            & trim(adjustl(reaclib% species(n+m,indx)))
+    	end subroutine write_n_to_m	
+        
+    end function reaction_string
+    
 end module netJina_lib

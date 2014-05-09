@@ -1,0 +1,120 @@
+
+
+What are the properties of cn337?
+ref.           :   frdm
+A, Z, N        = 337.0 112 225
+spin           =   1.5
+mass excess    =   388.680
+partition function
+__________________
+    T9       G(T9)
+==================
+   0.1  1.0000E+00
+   0.1  1.0000E+00
+   0.2  1.0100E+00
+   0.3  1.0400E+00
+   0.4  1.1000E+00
+   0.5  1.1700E+00
+   0.6  1.2500E+00
+   0.7  1.3500E+00
+   0.8  1.4700E+00
+   0.9  1.6000E+00
+   1.0  1.7500E+00
+   1.5  2.8500E+00
+   2.0  5.1500E+00
+   2.5  1.0600E+01
+   3.0  2.5100E+01
+   3.5  6.6700E+01
+   4.0  1.9500E+02
+   4.5  6.1400E+02
+   5.0  2.0600E+03
+   6.0  2.7900E+04
+   7.0  4.7000E+05
+   8.0  8.9400E+06
+   9.0  1.5600E+08
+  10.0  2.1000E+09
+__________________
+
+_____________________________
+First 50 entries of chapter 5
+=============================
+    d    d ==>     n  he3
+    d    d ==>     p    t
+    p    t ==>     n  he3
+    p    t ==>     n  he3
+    p    t ==>     d    d
+    d    t ==>     n  he4
+    d    t ==>     n  he4
+  he4    t ==>     n  li6
+  he4    t ==>     n  li6
+    n  he3 ==>     p    t
+    n  he3 ==>     p    t
+    n  he3 ==>     d    d
+    d  he3 ==>     p  he4
+    d  he3 ==>     p  he4
+    t  he3 ==>     d  he4
+  he4  he3 ==>     p  li6
+    n  he4 ==>     d    t
+    n  he4 ==>     d    t
+    p  he4 ==>     d  he3
+    p  he4 ==>     d  he3
+    d  he4 ==>     t  he3
+  he4  he4 ==>     n  be7
+  he4  he4 ==>     p  li7
+  he4  he4 ==>     p  li7
+  he4  he4 ==>     p  li7
+  he4  he4 ==>     p  li7
+    n  li6 ==>   he4    t
+    n  li6 ==>   he4    t
+    p  li6 ==>   he4  he3
+    d  li6 ==>     n  be7
+    d  li6 ==>     p  li7
+  he4  li6 ==>     p  be9
+  he4  li6 ==>     p  be9
+  he4  li6 ==>     p  be9
+    p  li7 ==>     n  be7
+    p  li7 ==>     n  be7
+    p  li7 ==>     d  li6
+    p  li7 ==>   he4  he4
+    p  li7 ==>   he4  he4
+    p  li7 ==>   he4  he4
+    p  li7 ==>   he4  he4
+    d  li7 ==>     p  li8
+    t  li7 ==>     n  be9
+    t  li7 ==>     n  be9
+    t  li7 ==>     d  li8
+    t  li7 ==>     d  li8
+  he4  li7 ==>     n  b10
+  he4  li7 ==>     p be10
+    p  li8 ==>     d  li7
+    d  li8 ==>     n  be9
+    d  li8 ==>     t  li7
+_____________________________
+
+What reaction has the most terms?
+ ca37 ==> p + k36 has   7 terms:
+ 7729  ca37    p  k36                   3.1989E+01 -4.3412E+01  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+ 7730  ca37    p  k36                   3.1766E+01 -4.3018E+01  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+ 7731  ca37    p  k36                   3.0854E+01 -4.2043E+01  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+ 7732  ca37    p  k36                   3.1479E+01 -4.6592E+01  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+ 7733  ca37    p  k36                  -7.1545E+00 -3.6008E+01  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+ 7734  ca37    p  k36                   3.1989E+01 -4.6546E+01  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+ 7735  ca37    p  k36                  -1.4419E+01 -3.5811E+01  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+
+What are the reaction channels for fe56?
+______________________________________________________
+id                    handle                  reaction
+======================================================
+ 1         nJ_p_fe56_to_co57         p + fe56 ==> co57
+ 2     nJ_he4_fe56_to_n_ni59   he4 + fe56 ==> n + ni59
+ 3       nJ_he4_fe56_to_ni60       he4 + fe56 ==> ni60
+ 4     nJ_he4_fe56_to_p_co59   he4 + fe56 ==> p + co59
+ 5         nJ_n_fe56_to_fe57         n + fe56 ==> fe57
+ 6       nJ_n_fe56_to_p_mn56     n + fe56 ==> p + mn56
+ 7         nJ_fe56_to_p_mn55         fe56 ==> p + mn55
+ 8     nJ_n_fe56_to_he4_cr53   n + fe56 ==> he4 + cr53
+ 9       nJ_fe56_to_he4_cr52       fe56 ==> he4 + cr52
+10     nJ_p_fe56_to_he4_mn53   p + fe56 ==> he4 + mn53
+11         nJ_fe56_to_n_fe55         fe56 ==> n + fe55
+12       nJ_p_fe56_to_n_co56     p + fe56 ==> n + co56
+______________________________________________________
