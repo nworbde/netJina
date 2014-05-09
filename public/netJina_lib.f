@@ -17,7 +17,7 @@ contains
         use netJina_storage
         use utils_lib, only: integer_dict_size
         character(len=*),parameter :: reaclib_db = 'reaclib_db'
-        character(len=*),parameter :: nuclib_db = 'nuclide_db'
+        character(len=*),parameter :: nuclib_db = 'nuclib_db'
         
         character(len=*), intent(in) :: datadir
         type(nuclib_data), intent(out) :: nuclib

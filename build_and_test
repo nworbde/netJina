@@ -20,11 +20,9 @@ else
     check_okay
 fi
 
-cd make
-make
+cd make; make
 check_okay
-cd ../test/make
-make
+cd ../test/make; make
 check_okay
 cd ..
 ./tester |tee test_output

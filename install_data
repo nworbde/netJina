@@ -10,32 +10,47 @@ function check_okay {
     fi
 }
 
+#databases
+RLIB=reaclib_db
+NLIB=nuclib_db
+
+#temporary files
+TMP_RLIB="tmp_$RLIB"
+TMP_NLIB="tmp_$NLIB"
+
+#compression suffic
+ZIP='.gz'
+UNZIP=`which gunzip`
+
+#locations
+RLIB_URL=https://dl.dropboxusercontent.com/u/52649885/netJina/20140508default2.gz
+NLIB_URL=https://dl.dropboxusercontent.com/u/52649885/netJina/winvne_v2.0.dat.gz
+
 mkdir -p data
 check_okay
-echo "fetching reaclib datafile from https://dl.dropboxusercontent.com/u/52649885/netJina/reaclib_db.gz
-"
+echo "fetching $NLIB from $RLIB_URL"
 cd data
-curl -o tmp_reaclib_db.gz https://dl.dropboxusercontent.com/u/52649885/netJina/reaclib_db.gz
+curl -o $TMP_RLIB$ZIP $RLIB_URL
 check_okay
 
 echo "unpacking data"
-gunzip tmp_reaclib_db.gz
+$UNZIP $TMP_RLIB$ZIP
 check_okay
 
 # now move to final location, prompt if overwrite
-mv -i tmp_reaclib_db reaclib_db
+mv -i $TMP_RLIB $RLIB
 
-echo "fetching nuclib from https://dl.dropboxusercontent.com/u/52649885/netJina/nuclide_db.gz
-"
-curl -o tmp_nuclide_db.gz     https://dl.dropboxusercontent.com/u/52649885/netJina/nuclide_db.gz
+echo "fetching $NLIB from $NLIB_URL"
+
+curl -o $TMP_NLIB$ZIP $NLIB_URL
 check_okay
 
 echo "unpacking data"
-gunzip tmp_nuclide_db.gz
+$UNZIP $TMP_NLIB$ZIP
 check_okay
 
 # now move to final location, prompt if overwrite
-mv -i tmp_nuclide_db nuclide_db
+mv -i $TMP_NLIB $NLIB
 echo "done"
 echo
 
