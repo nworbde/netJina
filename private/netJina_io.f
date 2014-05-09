@@ -243,15 +243,15 @@ contains
         integer, intent(in) :: nin, nout
         character(len=max_id_length) :: handle
         character(len=2),parameter :: nj = 'nJ'
-        character(len=4),parameter :: sep = '_to_'
+        character(len=3),parameter :: sep = '_to'
         integer :: i
         handle = nj
         do i = 1,nin
-            handle = trim(handle)//adjustl(species(i))
+            handle = trim(handle)//'_'//adjustl(species(i))
         end do
         handle = trim(handle)//sep
         do i = nin+1,min(nin+nout,size(species))
-            handle = trim(handle)//adjustl(species(i))
+            handle = trim(handle)//'_'//adjustl(species(i))
         end do
     end function do_generate_handle
     

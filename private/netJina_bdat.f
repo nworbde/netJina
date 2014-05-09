@@ -11,8 +11,16 @@ contains
         character(len=max_id_length),dimension(N_bdat_channels),intent(out) :: &
         & handles
         integer, intent(out) :: ierr
+        character(len=2),parameter :: nj = 'nJ'
+        character(len=3),parameter :: sep = '_to'
+        character(len=5),parameter,dimension(N_bdat_channels) ::  &
+        & lhs = [character(len=5) :: '_p_','_he4_','_he4_','_he4_','_n_', &
+        & '_n_','_','_n_','_','_p_','_','_p_']
+        character(len=5),parameter,dimension(N_bdat_channels) ::  &
+        & rhs = [character(len=5) :: '_','_n_','_','_p_','_','_p_','_p_', &
+        & '_he4_','_he4_','_he4_','_n_','_n_']
         integer :: indx
-        character(len=iso_name_length), dimension(N_bdat_channels) :: product
+        character(len=iso_name_length), dimension(N_bdat_channels) :: products
         integer :: Z, N, Zt, Nt, i
         
         ! lookup nuclide
@@ -25,9 +33,14 @@ contains
         do i = 1, N_bdat_channels
             Zt = Z + bdat_dZ(i)
             Nt = N + bdat_dN(i)
-            write(product(i),'(a,i0)') trim(element_name(Zt)),Zt+Nt
+            write(products(i),'(a,i0)') trim(element_name(Zt)),Zt+Nt
         end do
-        handles = product
+        
+        do i = 1, N_bdat_channels
+            handles(i) = nj//trim(lhs(i))//trim(isotope)// &
+            & sep//trim(rhs(i))//trim(products(i))
+        end do
+        
     end subroutine do_make_channel_handles
 
     function failure(action,ierr)
