@@ -16,7 +16,7 @@ contains
         integer :: Z, N, Zt, Nt, i
         
         ! lookup nuclide
-        call integer_dict_lookup(nuclide_dict,isotope,indx,ierr)
+        call integer_dict_lookup(nuclide_dict,trim(isotope),indx,ierr)
         if (failure('looking for '//trim(isotope)//'. error code ',ierr)) &
         & return
         Z = nuclib% Z(indx)

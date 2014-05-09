@@ -115,7 +115,7 @@ contains
         if (associated(nuclide_dict)) call integer_dict_free(nuclide_dict)
         do indx = 1, nuclib% Nnuclides
             call integer_dict_define(nuclide_dict, &
-            & nuclib% name(indx),indx,ierr)
+            & trim(adjustl(nuclib% name(indx))),indx,ierr)
         end do
     end subroutine do_parse_nuclides
     
@@ -215,9 +215,9 @@ contains
             handle = do_generate_handle(reaclib% species(:,i_rate), Nin, Nout)
             ! if we have a new handle, enter the location in the dictionary
             ! otherwise, increment the N_rate_terms entry
-            call integer_dict_lookup(rate_dict,handle,indx,ikey)
+            call integer_dict_lookup(rate_dict,trim(handle),indx,ikey)
             if (ikey /= 0) then
-                call integer_dict_define(rate_dict,handle,i_rate,ierr)
+                call integer_dict_define(rate_dict,trim(handle),i_rate,ierr)
             else
                 reaclib% N_rate_terms(indx) = reaclib% N_rate_terms(indx) + 1
             end if

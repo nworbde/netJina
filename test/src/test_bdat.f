@@ -11,13 +11,14 @@ program test_bdat
     integer :: i,j
     type(integer_dict), pointer :: rates_dict=>null(), nuclide_dict=>null()
     character(len=max_id_length),dimension(N_bdat_channels) :: handles
+    character(len=iso_name_length) :: iso
     
     call netJina_init(datadir,nuclib,nuclide_dict,reaclib,rates_dict,ierr)
     if (ierr /= 0) then
         write(error_unit,*) 'load reaclib returned error ',ierr
         stop
     end if
-
-    call make_channel_handles(' fe56',nuclib,nuclide_dict,handles,ierr)
+    iso = 'fe56'
+    call make_channel_handles(iso,nuclib,nuclide_dict,handles,ierr)
     write (output_unit,'(i3,tr2,a)') (i,trim(handles(i)), i=1,N_bdat_channels)
 end program test_bdat

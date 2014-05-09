@@ -46,7 +46,7 @@ program test_io
     & 'has ',max_terms,' terms'
     
     call get_handle(reaclib,indx(1),handle)
-    call integer_dict_lookup(rates_dict,handle,dindx,ierr)
+    call integer_dict_lookup(rates_dict,trim(handle),dindx,ierr)
     if (ierr == 0) then
         do i = dindx, dindx+max_terms-1
             write(output_unit,'(i5,tr1,6a5,tr2,7es12.4)')  &
