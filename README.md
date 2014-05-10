@@ -47,12 +47,13 @@ This returns the handles -- identifiers for the reactions -- for the following c
     character(len=max_id_length),dimension(N_bdat_channels) :: handles
 
 	i_pg							:= (p,g)
+	i_an							:= (a,n)
 	i_ag							:= (a,g)
 	i_ap							:= (a,p)
 	i_ng							:= (n,g)
 	i_np							:= (n,p)
 	i_gp							:= (g,p)
-	i_an							:= (a,n)
+    i_na                            := (n,a)
 	i_ga							:= (g,a)
 	i_pa							:= (p,a)
 	i_gn							:= (g,n)
