@@ -29,7 +29,7 @@ function verify_datafile {
     key_cksm=$2
     chk=`which md5`
     this_cksm=`$chk -q $db`
-    echo "checksum is $this_cksm"
+    echo "checksum is  $this_cksm"
     echo "compare with $key_cksm"
     if [ $this_cksm !=  $key_cksm ]; then
         echo "FAILED"
