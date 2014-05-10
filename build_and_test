@@ -11,24 +11,29 @@ function check_okay {
 	fi
 }
 
-# check that data files exist
-if [[ -f data/reaclib_db && -f data/nuclib_db ]]; then
-    echo "nuclib and reaclib databases exist"
-else
-    echo "I require the nuclib and reaclib databases; fetching them now"
-    ./install_data
-    check_okay
-fi
+echo
+echo "======================"
+echo "BUILDING NETJINA TOOLS"
+echo "======================"
+echo
 
+# install data files
+./install_data
+
+echo
+echo "Building libraries"
+echo "------------------"
 cd make; make
 check_okay
+
+echo
+echo "Testing"
+echo "-------"
 cd ../test/make; make
 check_okay
 cd ..
 ./tester |tee test_output
 check_okay
 cd ..
-echo "finished"
-echo
-echo "compare test/test_output with test/sample output"
+echo "finished. compare test/test_output with test/sample output"
 echo

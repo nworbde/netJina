@@ -33,8 +33,9 @@ function verify_datafile {
     echo "compare with $key_cksm"
     if [ $this_cksm !=  $key_cksm ]; then
         echo "FAILED"
-        exit 1
+        return 1
     fi
+    return 0
 }
 
 #databases
@@ -47,20 +48,57 @@ MD5_RLIB=06acba5a45a0f343a3a5f98cb522bbea
 RLIB_URL=https://dl.dropboxusercontent.com/u/52649885/netJina/20140508default2.gz
 NLIB_URL=https://dl.dropboxusercontent.com/u/52649885/netJina/winvne_v2.0.dat.gz
 
+echo
+echo "Installing Reaclib and Nuclib Datafiles"
+echo "---------------------------------------"
+
 echo "establishing data directory..."
 mkdir -p data
 check_okay
 cd data
 
-echo "fetching $RLIB from $RLIB_URL..."
-get_datafile $RLIB $RLIB_URL
-echo "verifying $RLIB..."
-verify_datafile $RLIB $MD5_RLIB
+# if file exists and is verified, then no need to fetch from repository
+need_to_fetch=1
+if [ -f $RLIB ]; then
+    echo "$RLIB exists...verifying"
+    verify_datafile $RLIB $MD5_RLIB
+    if [ $? -ne 0 ]; then
+        echo "verification failed"
+        need_to_fetch=1
+    else
+        echo "verification okay"
+        need_to_fetch=0
+    fi
+fi
 
-echo "fetching $NLIB from $NLIB_URL..."
-get_datafile $NLIB $NLIB_URL
-echo "verifying $RLIB..."
-verify_datafile $NLIB $MD5_NLIB
+if [ $need_to_fetch -eq 1 ]; then        
+    echo "fetching $RLIB from $RLIB_URL..."
+    get_datafile $RLIB $RLIB_URL
+    echo "verifying $RLIB..."
+    verify_datafile $RLIB $MD5_RLIB
+    check_okay
+fi
+
+need_to_fetch=1
+if [ -f $NLIB ]; then
+    echo "$NLIB exists...verifying"
+    verify_datafile $NLIB $MD5_NLIB
+    if [ $? -ne 0 ]; then
+        echo "verification failed"
+        need_to_fetch=1
+    else
+        echo "verification okay"
+        need_to_fetch=0
+    fi
+fi
+
+if [ $need_to_fetch -eq 1 ]; then        
+    echo "fetching $NLIB from $NLIB_URL..."
+    get_datafile $NLIB $NLIB_URL
+    echo "verifying $NLIB..."
+    verify_datafile $NLIB $MD5_NLIB
+    check_okay
+fi
 
 echo "done"
 echo
