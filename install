@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+
+function show_help {
+	echo "usage: $(basename "$0") $USAGE"
+	echo
+	echo "$LONG_USAGE"
+	exit 0
+}
+
+function check_okay {
+    if [ $? -ne 0 ]; then
+        echo
+        echo "installation failed..."
+        exit 1
+    fi
+}
+
+USAGE="</path/to/top-level>"
+LONG_USAGE="Installs netJina libraries in </path/to/top-level/lib> and Fortran include (*.mod) files in </path/to/top-level/include>."
+
+THISDIR=`pwd`
+ROOTDIR=""
+LIBDIR=""
+MODDIR=""
+
+LIBS="libnetJina.a"
+MODS=(  netjina_bdat.mod
+        netjina_def.mod
+        netjina_io.mod
+        netjina_lib.mod
+        netjina_storage.mod )
+
+# must have one argument: the path name to the texmf directory or a --help flag
+if [ "$#" -ne 1 ]; then
+	show_help
+fi
+
+# process options
+case "$1" in
+    -h|--h|--he|--hel|--help)
+	show_help
+esac
+
+ROOTDIR="$1"
+LIBDIR=$ROOTDIR/lib
+MODDIR=$ROOTDIR/include
+
+./build_and_test
+
+echo
+echo "installing files"
+echo "----------------"
+if [ ! -d $LIBDIR ]; then
+    echo "making $LIBDIR"
+    mkdir -p $LIBDIR
+    check_okay
+fi
+
+echo "installing $LIBS to $LIBDIR..."
+cp make/$LIBS $LIBDIR
+check_okay
+
+if [ ! -d $MODDIR ]; then
+    echo "making $MODDIR"
+    mkdir -p $MODDIR
+    check_okay
+fi
+
+echo "installing ${MODS[*]} to $MODDIR"
+for src in ${MODS[*]}; do
+    cp make/$src $MODDIR
+    check_okay
+done
+
+echo
+echo "======================"
+echo "Installation finished."
+echo "======================"
+echo
