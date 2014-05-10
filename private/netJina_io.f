@@ -104,7 +104,7 @@ contains
     subroutine do_parse_nuclides(nuclib,nuclide_dict,ierr)
         use utils_def, only: integer_dict
         use utils_lib, only: integer_dict_define, &
-        & integer_dict_lookup, integer_dict_free
+        & integer_dict_lookup, integer_dict_free, integer_dict_create_hash
         use netJina_def
         
         type(nuclib_data), intent(in) :: nuclib
@@ -117,6 +117,7 @@ contains
             call integer_dict_define(nuclide_dict, &
             & trim(adjustl(nuclib% name(indx))),indx,ierr)
         end do
+        call integer_dict_create_hash(nuclide_dict,ierr)
     end subroutine do_parse_nuclides
     
     subroutine do_load_reaclib(filename,rates,ierr)
@@ -201,7 +202,7 @@ contains
     subroutine do_parse_rates(reaclib,rate_dict,ierr)
         use utils_def, only: integer_dict
         use utils_lib, only: integer_dict_define, &
-        & integer_dict_lookup, integer_dict_free
+        & integer_dict_lookup, integer_dict_free, integer_dict_create_hash
         use netJina_def
         
         type(reaclib_data), intent(inout) :: reaclib
@@ -237,6 +238,8 @@ contains
             end if
             i_rate = i_rate+nterms
         end do
+        
+        call integer_dict_create_hash(rate_dict,ierr)
     end subroutine do_parse_rates
     
     function do_generate_handle(species,nin,nout) result(handle)
