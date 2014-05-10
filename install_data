@@ -10,47 +10,58 @@ function check_okay {
     fi
 }
 
+function get_datafile {
+    zip='.gz'
+    db=$1
+    tmpfile="tmp_$db"
+    archive="$tmpfile$zip"
+    url=$2
+    unzip=`which gunzip`
+    curl -fS -o $archive $url
+    check_okay
+    $unzip $archive
+    check_okay
+    mv -i $tmpfile $db
+}
+
+function verify_datafile {
+    db=$1
+    key_cksm=$2
+    chk=`which md5`
+    this_cksm=`$chk -q $db`
+    echo "checksum is  $this_cksm"
+    echo "compare with $key_cksm"
+    if [ $this_cksm !=  $key_cksm ]; then
+        echo "FAILED"
+        exit 1
+    fi
+}
+
 #databases
 RLIB=reaclib_db
 NLIB=nuclib_db
-
-#temporary files
-TMP_RLIB="tmp_$RLIB"
-TMP_NLIB="tmp_$NLIB"
-
-#compression suffic
-ZIP='.gz'
-UNZIP=`which gunzip`
-
+#checksums
+MD5_NLIB=2621b33271bec07f306922c8d72bce88
+MD5_RLIB=06acba5a45a0f343a3a5f98cb522bbea
 #locations
 RLIB_URL=https://dl.dropboxusercontent.com/u/52649885/netJina/20140508default2.gz
 NLIB_URL=https://dl.dropboxusercontent.com/u/52649885/netJina/winvne_v2.0.dat.gz
 
+echo "establishing data directory..."
 mkdir -p data
 check_okay
-echo "fetching $NLIB from $RLIB_URL"
 cd data
-curl -o $TMP_RLIB$ZIP $RLIB_URL
-check_okay
 
-echo "unpacking data"
-$UNZIP $TMP_RLIB$ZIP
-check_okay
+echo "fetching $RLIB from $RLIB_URL..."
+get_datafile $RLIB $RLIB_URL
+echo "verifying $RLIB..."
+verify_datafile $RLIB $MD5_RLIB
 
-# now move to final location, prompt if overwrite
-mv -i $TMP_RLIB $RLIB
+echo "fetching $NLIB from $NLIB_URL..."
+get_datafile $NLIB $NLIB_URL
+echo "verifying $RLIB..."
+verify_datafile $NLIB $MD5_NLIB
 
-echo "fetching $NLIB from $NLIB_URL"
-
-curl -o $TMP_NLIB$ZIP $NLIB_URL
-check_okay
-
-echo "unpacking data"
-$UNZIP $TMP_NLIB$ZIP
-check_okay
-
-# now move to final location, prompt if overwrite
-mv -i $TMP_NLIB $NLIB
 echo "done"
 echo
 
