@@ -14,14 +14,12 @@ function get_datafile {
     zip='.gz'
     db=$1
     tmpfile="tmp_$db"
-    archive="$tmpfile$zip"
     url=$2
     unzip=`which gunzip`
-    curl -fS -o $archive $url
-    check_okay
-    $unzip $archive
+    curl -fS $url | $unzip > $tmpfile
     check_okay
     mv -i $tmpfile $db
+    check_okay
 }
 
 function verify_datafile {
