@@ -22,6 +22,7 @@ THISDIR=`pwd`
 ROOTDIR=$THISDIR
 LIBDIR=""
 MODDIR=""
+DATADIR=""
 
 LIBS="libnetJina.a"
 MODS=(  netjina_bdat.mod
@@ -29,6 +30,8 @@ MODS=(  netjina_bdat.mod
         netjina_io.mod
         netjina_lib.mod
         netjina_storage.mod )
+DATA_DBS=(  reaclib_db
+            nuclib_db )
 
 # process options
 case "$1" in
@@ -49,6 +52,7 @@ done
     
 LIBDIR=$ROOTDIR/lib
 MODDIR=$ROOTDIR/include
+DATADIR=$ROOTDIR/data
 
 ./build_and_test
 
@@ -76,6 +80,19 @@ for src in ${MODS[*]}; do
     cp make/$src $MODDIR
     check_okay
 done
+
+if [ $ROOTDIR != $THISDIR ]; then
+    echo "installing ${DATA_DBS[*]} to $DATADIR"
+    if [ ! -d $DATADIR ]; then
+        echo "making $DATADIR"
+        mkdir -p $DATADIR
+        check_okay
+    fi
+    for src in ${DATA_DBS[*]}; do
+        cp data/$src $DATADIR
+        check_okay
+    done
+fi
 
 echo
 echo "======================"

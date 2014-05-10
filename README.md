@@ -5,13 +5,17 @@ Tools for working with [JINA reaclib](https://groups.nscl.msu.edu/jina/reaclib/d
 
 *   The code is written in FORTRAN, and uses the `utils` and `const` modules from [MESA](http://mesa.sourceforge.net). Compilation and testing have been done with the MESA SDK and with v6022 of MESA.
 
-*   The code requires two databases, one containing the nuclide database and the other containing the reaclib database.  The script `install_data` fetches both from https://dl.dropboxusercontent.com/u/52649885/netJina/ .
+*   The code requires two databases, one containing the nuclide database and the other containing the reaclib database.  The script `fetch_data` fetches both from https://dl.dropboxusercontent.com/u/52649885/netJina/ .
 
 ## Installation
 
-    ./build_and_test
-    
-This script first calls `install_data`: if the data files are missing or have the incorrect checksum, then fresh copies are downloaded and checked. The libraries are then built, and then a small test program is run.  The output of the test program is in `test/test_output` and should be compared to `test/sample_output`.
+### Basic
+
+    ./install [-d /path/to/project/root]
+
+This top-level script calls all of the other build scripts, and installs them in subdirectories of `/path/to/project/root`. If `install` is called with no options, then the files are installed in the local directory.
+
+For a more granular build, first `./fetch_data`: if the data files are missing or have the incorrect checksum, then fresh copies are downloaded and checked. Then `./build_and_test`: the libraries are compiled, and a small test program is compiled and run.  The output of the test program is in `test/test_output` and should be compared to `test/sample_output`. The `*.a` and `*.mod` files should be copied from `make` into their final locations, as should `reaclib_db` and `nuclib_db` from the `data` directory.
 
 ## How to use (still under development)
 Look in `test/src/test_io.f` for an example of source code, and in `test/make/makefile` for an example of compiling and linking the libraries.
@@ -43,12 +47,13 @@ This returns the handles -- identifiers for the reactions -- for the following c
     character(len=max_id_length),dimension(N_bdat_channels) :: handles
 
 	i_pg							:= (p,g)
+	i_an							:= (a,n)
 	i_ag							:= (a,g)
 	i_ap							:= (a,p)
 	i_ng							:= (n,g)
 	i_np							:= (n,p)
 	i_gp							:= (g,p)
-	i_an							:= (a,n)
+    i_na                            := (n,a)
 	i_ga							:= (g,a)
 	i_pa							:= (p,a)
 	i_gn							:= (g,n)
