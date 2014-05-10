@@ -41,6 +41,7 @@ contains
         use netJina_def
         use utils_def
         use utils_lib
+        use iso_fortran_env, only: error_unit
         character(len=iso_name_length), intent(in) :: isotope
         type(nuclib_data), intent(in) :: nuclib
         type(integer_dict), pointer :: nuclide_dict
@@ -58,6 +59,7 @@ contains
         integer :: indx
         character(len=iso_name_length), dimension(N_bdat_channels) :: products
         integer :: Z, N, Zt, Nt, i
+        character(len=*), parameter :: null_handle = 'None'
         
         ! lookup nuclide
         call integer_dict_lookup(nuclide_dict,trim(isotope),indx,ierr)
@@ -65,6 +67,22 @@ contains
         & return
         Z = nuclib% Z(indx)
         N = nuclib% N(indx)
+
+        handles = null_handle
+        
+        ! set limits on Z, N
+        if (Z <= 2 .or. Z > max_element_z-2) then
+            ierr = -10
+            write(error_unit,'(a,i3,a)') 'Z = ',Z, &
+            & ' will produce out-range-links'
+            return
+        end if
+        if (N <= 2 .or. N > maxval(nuclib% N)-2) then
+            ierr = -11
+            write(error_unit,'(a,i3,a)') 'N = ',N, &
+            & ' will produce out-of-range links'
+            return
+        end if
         
         do i = 1, N_bdat_channels
             Zt = Z + bdat_dZ(i)

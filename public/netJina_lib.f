@@ -85,6 +85,7 @@ contains
         
         ! debugging
         if (trim(nuclib% name(indx)) /= trim(nuclide)) then
+            ierr = -1
             write(error_unit,'(a)') 'got the wrong nucleus'
             return
         end if
