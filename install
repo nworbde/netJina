@@ -15,11 +15,11 @@ function check_okay {
     fi
 }
 
-USAGE="</path/to/top-level>"
-LONG_USAGE="Installs netJina libraries in </path/to/top-level/lib> and Fortran include (*.mod) files in </path/to/top-level/include>."
+USAGE="[(-d|--directory) </path/to/top-level>]"
+LONG_USAGE="With -d or --directory option, installs netJina libraries in </path/to/top-level/lib> and Fortran include (*.mod) files in </path/to/top-level/include>.  If no option is given, the <top-level> directory is taken to be the current one."
 
 THISDIR=`pwd`
-ROOTDIR=""
+ROOTDIR=$THISDIR
 LIBDIR=""
 MODDIR=""
 
@@ -30,18 +30,23 @@ MODS=(  netjina_bdat.mod
         netjina_lib.mod
         netjina_storage.mod )
 
-# must have one argument: the path name to the texmf directory or a --help flag
-if [ "$#" -ne 1 ]; then
-	show_help
-fi
-
 # process options
 case "$1" in
-    -h|--h|--he|--hel|--help)
+    -h|--help)
 	show_help
 esac
 
-ROOTDIR="$1"
+while case "$#" in 0) break ;; esac
+do
+    case "$1" in
+        -d|--directory)
+        shift
+        ROOTDIR="$1"
+        ;;
+    esac
+    shift
+done
+    
 LIBDIR=$ROOTDIR/lib
 MODDIR=$ROOTDIR/include
 
