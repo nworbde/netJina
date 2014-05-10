@@ -9,11 +9,12 @@ Tools for working with [JINA reaclib](https://groups.nscl.msu.edu/jina/reaclib/d
 
 ## Installation
 
-    ./install_data
     ./build_and_test
+    
+This script first calls `install_data`: if the data files are missing or have the incorrect checksum, then fresh copies are downloaded and checked. The libraries are then built, and then a small test program is run.  The output of the test program is in `test/test_output` and should be compared to `test/sample_output`.
 
 ## How to use (still under development)
-Look in `test/src/test_io.f` for an example.
+Look in `test/src/test_io.f` for an example of source code, and in `test/make/makefile` for an example of compiling and linking the libraries.
 
 In summary, you initialize the module
 
