@@ -34,6 +34,10 @@ check_okay
 cd ..
 ./tester |tee test_output
 check_okay
-cd ..
-echo "finished. compare test/test_output with test/sample output"
 echo
+echo "test program finished. compare test/test_output with test/sample output."
+cmp --quiet test_output sample_output
+check_okay
+echo "test_output matches expected."
+echo
+cd ..
