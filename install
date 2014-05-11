@@ -57,7 +57,7 @@ DATADIR=$ROOTDIR/data
 ./build_and_test
 
 echo
-echo "installing files"
+echo "Installing files"
 echo "----------------"
 if [ ! -d $LIBDIR ]; then
     echo "making $LIBDIR"
