@@ -26,7 +26,7 @@ contains
         use, intrinsic :: iso_fortran_env, only: iostat_end, error_unit
         use netJina_def
         use netJina_storage
-        use utils_lib, only: alloc_iounit
+        use utils_lib, only: alloc_iounit, free_iounit
         
         character(len=*), intent(in) :: filename
         type(nuclib_data), intent(out) :: nuclides
@@ -69,6 +69,7 @@ contains
             & write (error_unit,'(a)',advance='no') '.'
         end do
         close(nuclib_unitno)
+        call free_iounit(nuclib_unitno)
         tmp_n% Nnuclides = i-1
         call copy_nuclib_data(tmp_n,nuclides,ierr)
         if (io_failure('copying nuclib data',ierr)) return
@@ -121,7 +122,7 @@ contains
         use, intrinsic :: iso_fortran_env, only: iostat_end, error_unit
         use netJina_def
         use netJina_storage
-        use utils_lib, only: alloc_iounit
+        use utils_lib, only: alloc_iounit, free_iounit
         
         character(len=*), intent(in) :: filename
         type(reaclib_data), intent(out) :: rates
@@ -166,6 +167,7 @@ contains
             
         end do
         close(reaclib_unitno)
+        call free_iounit(reaclib_unitno)
         tmp_rates%  Nentries = count
                 
         call copy_reaclib_data(tmp_rates,rates,ierr)
@@ -197,6 +199,7 @@ contains
     end subroutine do_load_reaclib
     
     subroutine do_parse_rates(reaclib,rate_dict,ierr)
+        use, intrinsic :: iso_fortran_env, only : error_unit
         use utils_def, only: integer_dict
         use utils_lib, only: integer_dict_define, &
         & integer_dict_lookup, integer_dict_free, integer_dict_create_hash
@@ -210,20 +213,24 @@ contains
          
         if (associated(rate_dict)) call integer_dict_free(rate_dict)
         reaclib% N_rate_terms(:) = 1
+        write (error_unit, '(a)') 'generating handles'
         do i_rate = 1, reaclib% Nentries
             nin = nJ_Nin(reaclib% chapter(i_rate))
             nout = nJ_Nout(reaclib% chapter(i_rate))
-            handle = do_generate_handle(reaclib% species(:,i_rate), Nin, Nout)
+            handle = do_generate_handle(reaclib% species(:,i_rate), nin, nout)
             ! if we have a new handle, enter the location in the dictionary
             ! otherwise, increment the N_rate_terms entry
+!             write(error_unit,*) handle
             call integer_dict_lookup(rate_dict,trim(handle),indx,ikey)
             if (ikey /= 0) then
                 call integer_dict_define(rate_dict,trim(handle),i_rate,ierr)
             else
                 reaclib% N_rate_terms(indx) = reaclib% N_rate_terms(indx) + 1
             end if
+            if (mod(i_rate,1000) == 0)  &
+            & write (error_unit,'(a)',advance='no') '.'
         end do
-        
+        write (error_unit,'(a)') 'done'
         ! now pass through and set N_rate_terms for all terms
         i_rate = 1
         do
