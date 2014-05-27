@@ -210,27 +210,30 @@ contains
         integer, intent(out) :: ierr
         integer :: i_rate, nin, nout, ikey, indx, nterms
         character(len=max_id_length) :: handle
-         
+        integer :: handle_unit
         if (associated(rate_dict)) call integer_dict_free(rate_dict)
         reaclib% N_rate_terms(:) = 1
-        write (error_unit, '(a)') 'generating handles'
+        write (error_unit, '(a)') 'generating handles'        
+        open (newunit=handle_unit,file='handles',action='write')
         do i_rate = 1, reaclib% Nentries
             nin = nJ_Nin(reaclib% chapter(i_rate))
             nout = nJ_Nout(reaclib% chapter(i_rate))
             handle = do_generate_handle(reaclib% species(:,i_rate), nin, nout)
             ! if we have a new handle, enter the location in the dictionary
             ! otherwise, increment the N_rate_terms entry
-!             write(error_unit,*) handle
-            call integer_dict_lookup(rate_dict,trim(handle),indx,ikey)
-            if (ikey /= 0) then
-                call integer_dict_define(rate_dict,trim(handle),i_rate,ierr)
-            else
-                reaclib% N_rate_terms(indx) = reaclib% N_rate_terms(indx) + 1
-            end if
+            write(handle_unit,'(a)') trim(handle)
+!             call integer_dict_lookup(rate_dict,trim(handle),indx,ikey)
+!             if (ikey /= 0) then
+!                 call integer_dict_define(rate_dict,trim(handle),i_rate,ierr)
+!             else
+!                 reaclib% N_rate_terms(indx) = reaclib% N_rate_terms(indx) + 1
+!             end if
             if (mod(i_rate,1000) == 0)  &
             & write (error_unit,'(a)',advance='no') '.'
         end do
         write (error_unit,'(a)') 'done'
+        close(handle_unit)
+        return
         ! now pass through and set N_rate_terms for all terms
         i_rate = 1
         do

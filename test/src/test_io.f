@@ -27,7 +27,7 @@ program test_io
         write(error_unit,*) 'failure in initialization ',ierr
         stop
     end if
-    
+    stop
     write(output_unit,'(/,/,a)') 'What are the properties of cn337?'
     call get_nuclide_properties('cn337',nuclib,nuclide_dict, &
     & A,Z,N,S,E,partition_fcn,provenance,ierr)
