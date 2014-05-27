@@ -27,7 +27,7 @@ program test_io
         write(error_unit,*) 'failure in initialization ',ierr
         stop
     end if
-    stop
+
     write(output_unit,'(/,/,a)') 'What are the properties of cn337?'
     call get_nuclide_properties('cn337',nuclib,nuclide_dict, &
     & A,Z,N,S,E,partition_fcn,provenance,ierr)
@@ -68,7 +68,7 @@ program test_io
     call get_handle(reaclib,indx(1),handle)
     call integer_dict_lookup(rates_dict,trim(handle),dindx,ierr)
     if (ierr == 0) then
-        do i = dindx, dindx+max_terms-1
+        do i = dindx-max_terms+1, dindx
             write(output_unit,'(i5,tr1,6a5,tr2,7es12.4)')  &
             & i,reaclib% species(:,i),reaclib% coefficients(:,i)
         end do

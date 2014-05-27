@@ -29,8 +29,8 @@ contains
             end if
             q(i) = reaclib% Qvalue(indx)
             n_coeff(i) = reaclib% N_rate_terms(indx)*ncoefficients
-            istart = indx
-            iend = istart + reaclib% N_rate_terms(indx) - 1
+            istart = indx - reaclib% N_rate_terms(indx) + 1
+            iend = indx
             rate_coefficients(1:n_coeff(i),i) =  reshape( &
             & reaclib% coefficients(1:ncoefficients,istart:iend),[n_coeff(i)])
             rate_mask(i) = (reaclib% reverse_flag(indx) /= 'v')

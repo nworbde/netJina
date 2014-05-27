@@ -201,8 +201,7 @@ contains
     subroutine do_parse_rates(reaclib,rate_dict,ierr)
         use, intrinsic :: iso_fortran_env, only : error_unit
         use utils_def, only: integer_dict
-        use utils_lib, only: integer_dict_define, &
-        & integer_dict_lookup, integer_dict_free, integer_dict_create_hash
+        use utils_lib, only: integer_dict_define_and_check
         use netJina_def
         
         type(reaclib_data), intent(inout) :: reaclib
@@ -210,43 +209,28 @@ contains
         integer, intent(out) :: ierr
         integer :: i_rate, nin, nout, ikey, indx, nterms
         character(len=max_id_length) :: handle
-        integer :: handle_unit
+        integer :: i_head
+        logical :: duplicate
+        
         if (associated(rate_dict)) call integer_dict_free(rate_dict)
         reaclib% N_rate_terms(:) = 1
         write (error_unit, '(a)') 'generating handles'        
-        open (newunit=handle_unit,file='handles',action='write')
+
         do i_rate = 1, reaclib% Nentries
             nin = nJ_Nin(reaclib% chapter(i_rate))
             nout = nJ_Nout(reaclib% chapter(i_rate))
             handle = do_generate_handle(reaclib% species(:,i_rate), nin, nout)
-            ! if we have a new handle, enter the location in the dictionary
-            ! otherwise, increment the N_rate_terms entry
-            write(handle_unit,'(a)') trim(handle)
-!             call integer_dict_lookup(rate_dict,trim(handle),indx,ikey)
-!             if (ikey /= 0) then
-!                 call integer_dict_define(rate_dict,trim(handle),i_rate,ierr)
-!             else
-!                 reaclib% N_rate_terms(indx) = reaclib% N_rate_terms(indx) + 1
-!             end if
+
+            call integer_dict_define_and_check(rate_dict,trim(handle),i_rate,duplicate,ierr)
+            if (.not. duplicate) then
+                reaclib% N_rate_terms(i_rate) = 1
+            else
+                reaclib% N_rate_terms(i_rate) = reaclib% N_rate_terms(i_rate-1) + 1
+            end if
             if (mod(i_rate,1000) == 0)  &
             & write (error_unit,'(a)',advance='no') '.'
         end do
         write (error_unit,'(a)') 'done'
-        close(handle_unit)
-        return
-        ! now pass through and set N_rate_terms for all terms
-        i_rate = 1
-        do
-            if (i_rate >= reaclib% Nentries) exit
-            nterms = reaclib% N_rate_terms(i_rate)
-            if (reaclib% N_rate_terms(i_rate) > 1) then
-                reaclib% N_rate_terms(i_rate+1:i_rate+nterms-1) =  &
-                & reaclib% N_rate_terms(i_rate)
-            end if
-            i_rate = i_rate+nterms
-        end do
-        
-        call integer_dict_create_hash(rate_dict,ierr)
     end subroutine do_parse_rates
     
     function do_generate_handle(species,nin,nout) result(handle)
