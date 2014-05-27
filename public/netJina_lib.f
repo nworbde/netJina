@@ -15,7 +15,7 @@ contains
         use netJina_def
         use netJina_io
         use netJina_storage
-        use utils_lib, only: integer_dict_size
+        use utils_lib, only: integer_dict_size, integer_dict_lookup
         character(len=*),parameter :: reaclib_db = 'reaclib_db'
         character(len=*),parameter :: nuclib_db = 'nuclib_db'
         
@@ -27,6 +27,7 @@ contains
         integer, intent(out) :: ierr
 
         character(len=160) :: reaclib_filename, nuclib_filename
+        integer :: indx
         
         nuclib_filename = trim(datadir)//'/'//nuclib_db
         reaclib_filename = trim(datadir)//'/'//reaclib_db
@@ -41,7 +42,11 @@ contains
         & ' nuclides retrieved. now writing nuclide dictionary...'
         call do_parse_nuclides(nuclib,nuclide_dict,ierr)
         write(error_unit,'(a//)') 'done.'
+        call integer_dict_lookup(nuclide_dict, 'fe56', indx, ierr)
+        print *, nuclib% name(indx), nuclib% A(indx), nuclib% Z(indx)
+        print *,nuclib% name(nuclib% Nnuclides), nuclib% A(nuclib% Nnuclides), nuclib% Z(nuclib% Nnuclides)
         
+        stop
         write(error_unit,'(a)')  &
         & 'loading reaclib from '//trim(reaclib_filename)
         call do_load_reaclib(reaclib_filename,reaclib,ierr)
