@@ -17,7 +17,10 @@ default: install
 $(TEST_TARGET): $(TEST_OBJS) $(TEST_LIBS)
 	$(LOADER) $(FCopenmp) -o $(TEST_TARGET) $(TEST_OBJS) $(LOAD_LOCAL) $(LOAD_OTHER)
 
-install: $(TEST_TARGET)
+test_dict: test_dict.o $(TEST_LIBS)
+	$(LOADER) $(FCopenmp) -o $@ test_dict.o $(LOAD_OTHER)
+
+install: $(TEST_TARGET) test_dict
 	cp $? $(TEST_DIR)
 
 clean:

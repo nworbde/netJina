@@ -4,3 +4,6 @@ data
 *.mod
 tester
 test_output
+test_dict
+test/handles
+
