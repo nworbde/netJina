@@ -35,6 +35,14 @@ module netJina_def
     integer, parameter :: max_element_z = 112
     ! used to output a formatted reaction string
     integer, parameter :: length_reaction_string = 45
+
+    ! for starlib
+    ! maximum number of individual rates in starlib
+    integer, parameter :: max_nstarlib = 80000
+    ! data storage parameters for starlib
+    integer, parameter :: number_starlib_temps = 60
+    integer, parameter :: starlib_max_species_per_reaction = 4
+
     
     ! table of elements; note that hydrogen is referred to as 'p' in the table 
     ! and neutrons are referred to as 'n'
@@ -127,6 +135,20 @@ module netJina_def
         real(dp),dimension(:,:),allocatable :: coefficients
         integer,dimension(:),allocatable :: N_rate_terms
     end type reaclib_data
+    
+    ! storage container for starlib file
+    type starlib_data
+        integer :: Nentries
+        integer, dimension(:), allocatable :: chapter
+        character(len=iso_name_length), dimension(:,:), allocatable :: species
+        character(len=iso_name_length), dimension(:), allocatable :: label
+        character,dimension(:), allocatable :: reaction_flag
+        character,dimension(:), allocatable :: reverse_flag
+        real(dp),dimension(:), allocatable :: Qvalue
+        real(dp),dimension(:,:), allocatable :: T9
+        real(dp),dimension(:,:), allocatable :: rate
+        real(dp),dimension(:,:), allocatable :: uncertainty
+    end type starlib_data
 
     ! container to hold locations for all terms for a given rate. Reaclib uses a
     ! seven-term fit for each entry.  If this is insufficient, it uses more
