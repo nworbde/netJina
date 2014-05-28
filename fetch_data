@@ -39,16 +39,21 @@ function verify_datafile {
 #databases
 RLIB=reaclib_db
 NLIB=nuclib_db
+SLIB=starlib_db
+
 #checksums
 MD5_NLIB=2621b33271bec07f306922c8d72bce88
 MD5_RLIB=06acba5a45a0f343a3a5f98cb522bbea
+MD5_SLIB=2c6d666e395af3223e50da5a9566d09f
+
 #locations
 RLIB_URL=https://dl.dropboxusercontent.com/u/52649885/netJina/20140508default2.gz
 NLIB_URL=https://dl.dropboxusercontent.com/u/52649885/netJina/winvne_v2.0.dat.gz
+SLIB_URL=http://starlib.physics.unc.edu/starlib_v4.dat
 
 echo
-echo "Installing Reaclib and Nuclib Datafiles"
-echo "---------------------------------------"
+echo "Installing Reaclib, Nuclib, and Starlib Datafiles"
+echo "-------------------------------------------------"
 
 echo "establishing data directory..."
 mkdir -p data
@@ -95,6 +100,28 @@ if [ $need_to_fetch -eq 1 ]; then
     get_datafile $NLIB $NLIB_URL
     echo "verifying $NLIB..."
     verify_datafile $NLIB $MD5_NLIB
+    check_okay
+fi
+
+need_to_fetch=1
+if [ -f $SLIB ]; then
+    echo "$SLIB exists...verifying"
+    verify_datafile $SLIB $MD5_SLIB
+    if [ $? -ne 0 ]; then
+        echo "verification failed"
+        need_to_fetch=1
+    else
+        echo "verification okay"
+        need_to_fetch=0
+    fi
+fi
+
+if [ $need_to_fetch -eq 1 ]; then        
+    echo "fetching $SLIB from $SLIB_URL..."
+    curl -fS $SLIB_URL > $SLIB
+    check_okay
+    echo "verifying $SLIB..."
+    verify_datafile $SLIB $MD5_SLIB
     check_okay
 fi
 
