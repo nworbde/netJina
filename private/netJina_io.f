@@ -188,19 +188,26 @@ contains
         close(cache_unitno)
     end subroutine do_write_nuclib_cache
     
-    subroutine do_load_reaclib(filename,rates,ierr)
+    subroutine do_load_reaclib(filename,cache_filename,rates,ierr)
         use, intrinsic :: iso_fortran_env, only: iostat_end, error_unit
         use netJina_def
         use netJina_storage
         use utils_lib, only: alloc_iounit, free_iounit
         
-        character(len=*), intent(in) :: filename
+        character(len=*), intent(in) :: filename, cache_filename
         type(reaclib_data), intent(out) :: rates
         integer, intent(out) :: ierr
         integer :: i, reaclib_unitno, count, iend
         type(reaclib_data) :: tmp_rates
+        logical :: have_cache
 
         ierr = 0
+        inquire(file=cache_filename,exist=have_cache)
+        if (have_cache) then
+            call do_read_reaclib_cache(cache_filename,rates,ierr)
+            if (ierr == 0) return
+        end if
+        
         reaclib_unitno = alloc_iounit(ierr)
         if (io_failure('allocating iounit',ierr)) return
         
@@ -245,6 +252,10 @@ contains
         
         call free_reaclib_data(tmp_rates)
         
+        if (.not.have_cache) then
+            call do_write_reaclib_cache(cache_filename,rates,ierr)
+        end if
+        
     contains
      
         subroutine copy_reaclib_data(old_data,new_data,ierr)
@@ -267,6 +278,61 @@ contains
             new_data% coefficients(:,:) = old_data% coefficients(:,1:n)
         end subroutine copy_reaclib_data
     end subroutine do_load_reaclib
+    
+    subroutine do_read_reaclib_cache(filename,rates,ierr)
+        use netJina_def
+        use netJina_storage
+        character(len=*), intent(in) :: filename
+        type(reaclib_data), intent(out) :: rates
+        integer, intent(out) :: ierr
+        integer :: cache_unitno, n
+        
+        ierr = 0
+        
+        open(newunit=cache_unitno, file=trim(filename), iostat=ierr, &
+        &   action="read",status="old",form="unformatted")
+        if (io_failure('opening '//trim(filename),ierr)) return
+        
+        read(cache_unitno) n
+        call allocate_reaclib_data(rates, n, ierr)
+        read(cache_unitno) rates% chapter
+        read(cache_unitno) rates% species
+        read(cache_unitno) rates% label
+        read(cache_unitno) rates% reverse_flag
+        read(cache_unitno) rates% Qvalue
+        read(cache_unitno) rates% reaction_flag
+        read(cache_unitno) rates% coefficients
+        read(cache_unitno) rates% N_rate_terms
+
+        close(cache_unitno)
+    end subroutine do_read_reaclib_cache
+     
+    subroutine do_write_reaclib_cache(filename,rates,ierr)
+        use netJina_def
+        character(len=*), intent(in) :: filename
+        type(reaclib_data), intent(in) :: rates
+        integer, intent(out) :: ierr
+        integer :: cache_unitno
+        
+        ierr = 0
+        if (rates% Nentries == 0) return
+        
+        open(newunit=cache_unitno, file=trim(filename), iostat=ierr, &
+        &   action="write",form="unformatted")
+        if (io_failure('opening '//trim(filename),ierr)) return
+        
+        write(cache_unitno) rates% Nentries
+        write(cache_unitno) rates% chapter
+        write(cache_unitno) rates% species
+        write(cache_unitno) rates% label
+        write(cache_unitno) rates% reverse_flag
+        write(cache_unitno) rates% Qvalue
+        write(cache_unitno) rates% reaction_flag
+        write(cache_unitno) rates% coefficients
+        write(cache_unitno) rates% N_rate_terms
+
+        close(cache_unitno)
+    end subroutine do_write_reaclib_cache
     
     subroutine do_parse_rates(reaclib,rate_dict,ierr)
         use, intrinsic :: iso_fortran_env, only : error_unit
@@ -301,13 +367,13 @@ contains
         end do
     end subroutine do_parse_rates
     
-    subroutine do_load_starlib(filename,rates,ierr)
+    subroutine do_load_starlib(filename,cache_filename,rates,ierr)
         use, intrinsic :: iso_fortran_env, only: iostat_end, error_unit
         use netJina_def
         use netJina_storage
         use utils_lib, only: alloc_iounit, free_iounit
         
-        character(len=*), intent(in) :: filename
+        character(len=*), intent(in) :: filename,cache_filename
         type(starlib_data), intent(out) :: rates
         integer, intent(out) :: ierr
         integer :: i, starlib_unitno, count, iend, j
@@ -322,8 +388,15 @@ contains
         character(len=iso_name_length) :: prov
         character :: reverse
         real(dp) :: q
+        logical :: have_cache
         
         ierr = 0
+        inquire(file=cache_filename,exist=have_cache)
+        if (have_cache) then
+            call do_read_starlib_cache(cache_filename,rates,ierr)
+            if (ierr == 0) return
+        end if
+
         starlib_unitno = alloc_iounit(ierr)
         if (io_failure('allocating iounit',ierr)) return
         
@@ -366,6 +439,10 @@ contains
         call copy_starlib_data(tmp_rates,rates,ierr)
         if (io_failure('copying starlib data',ierr)) return
         call free_starlib_data(tmp_rates)
+        
+        if (.not.have_cache) then
+            call do_write_starlib_cache(cache_filename,rates,ierr)
+        end if
         
     contains
         subroutine parse_header(header,chapter,ns,species,prov,reverse,q)
@@ -417,6 +494,61 @@ contains
             new_data% uncertainty(:,:) = old_data% uncertainty(:,1:n)
         end subroutine copy_starlib_data
     end subroutine do_load_starlib    
+    
+    subroutine do_read_starlib_cache(filename,rates,ierr)
+        use netJina_def
+        use netJina_storage
+        character(len=*), intent(in) :: filename
+        type(starlib_data), intent(out) :: rates
+        integer, intent(out) :: ierr
+        integer :: cache_unitno, n
+        
+        ierr = 0
+        
+        open(newunit=cache_unitno, file=trim(filename), iostat=ierr, &
+        &   action="read",status="old",form="unformatted")
+        if (io_failure('opening '//trim(filename),ierr)) return
+        
+        read(cache_unitno) n
+        call allocate_starlib_data(rates, n, ierr)
+        read(cache_unitno) rates% chapter
+        read(cache_unitno) rates% species
+        read(cache_unitno) rates% label
+        read(cache_unitno) rates% reverse_flag
+        read(cache_unitno) rates% Qvalue
+        read(cache_unitno) rates% T9
+        read(cache_unitno) rates% rate
+        read(cache_unitno) rates% uncertainty
+
+        close(cache_unitno)
+    end subroutine do_read_starlib_cache
+     
+    subroutine do_write_starlib_cache(filename,rates,ierr)
+        use netJina_def
+        character(len=*), intent(in) :: filename
+        type(starlib_data), intent(in) :: rates
+        integer, intent(out) :: ierr
+        integer :: cache_unitno
+        
+        ierr = 0
+        if (rates% Nentries == 0) return
+        
+        open(newunit=cache_unitno, file=trim(filename), iostat=ierr, &
+        &   action="write",form="unformatted")
+        if (io_failure('opening '//trim(filename),ierr)) return
+        
+        write(cache_unitno) rates% Nentries
+        write(cache_unitno) rates% chapter
+        write(cache_unitno) rates% species
+        write(cache_unitno) rates% label
+        write(cache_unitno) rates% reverse_flag
+        write(cache_unitno) rates% Qvalue
+        write(cache_unitno) rates% T9
+        write(cache_unitno) rates% rate
+        write(cache_unitno) rates% uncertainty
+
+        close(cache_unitno)
+    end subroutine do_write_starlib_cache
     
     subroutine do_parse_starlib(starlib,starlib_dict,ierr)
         use, intrinsic :: iso_fortran_env, only : error_unit

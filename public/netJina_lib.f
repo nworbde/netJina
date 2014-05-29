@@ -54,7 +54,7 @@ contains
         
         write(error_unit,'(a)')  &
         & 'loading reaclib from '//trim(reaclib_filename)
-        call do_load_reaclib(reaclib_filename,reaclib,ierr)
+        call do_load_reaclib(reaclib_filename,reaclib_cache,reaclib,ierr)
         write(error_unit,'(/,a,i0,a)') 'done. ',reaclib% Nentries, &
         & ' entries retrieved. now writing reaction dictionary'
         call do_parse_rates(reaclib,rate_dict,ierr)
@@ -63,7 +63,7 @@ contains
 
         write(error_unit,'(/,/,a)') &
         &   'loading starlib from '//trim(starlib_filename)
-        call do_load_starlib(starlib_filename,starlib,ierr)
+        call do_load_starlib(starlib_filename,starlib_cache,starlib,ierr)
         write(error_unit,'(/,a,i0,a)') 'done. ',starlib% Nentries,  &
         &   ' entries retrieved. now writing reaction dictionary'
         call do_parse_starlib(starlib,starlib_dict,ierr)
