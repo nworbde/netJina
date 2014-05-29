@@ -10,7 +10,8 @@ module netJina_lib
     use utils_def, only: integer_dict
     
 contains
-    subroutine netJina_init(datadir,nuclib,nuclide_dict,reaclib,rate_dict,ierr)
+    subroutine netJina_init(datadir,nuclib,nuclide_dict,reaclib, &
+    &   starlib,rate_dict,starlib_dict,ierr)
         use iso_fortran_env, only: error_unit
         use netJina_def
         use netJina_io
@@ -18,21 +19,24 @@ contains
         use utils_lib, only: integer_dict_size ! , integer_dict_lookup
         character(len=*),parameter :: reaclib_db = 'reaclib_db'
         character(len=*),parameter :: nuclib_db = 'nuclib_db'
+        character(len=*),parameter :: starlib_db = 'starlib_db'
         
         character(len=*), intent(in) :: datadir
         type(nuclib_data), intent(out) :: nuclib
         type(integer_dict), pointer :: nuclide_dict
         type(reaclib_data), intent(out) :: reaclib
+        type(starlib_data), intent(out) :: starlib
         type(integer_dict), pointer :: rate_dict
+        type(integer_dict), pointer :: starlib_dict
         integer, intent(out) :: ierr
 
-        character(len=160) :: reaclib_filename, nuclib_filename
+        character(len=160) :: reaclib_filename, nuclib_filename, starlib_filename
         integer :: indx
         
         nuclib_filename = trim(datadir)//'/'//nuclib_db
         reaclib_filename = trim(datadir)//'/'//reaclib_db
-        if (reaclib% Nentries /= 0) call free_reaclib_data(reaclib)
-
+        starlib_filename = trim(datadir)//'/'//starlib_db
+        
         ierr = 0
         write(error_unit,'(a)')  &
         & 'loading nuclib from '//trim(nuclib_filename)
@@ -41,7 +45,7 @@ contains
         & 'done. ',nuclib% Nnuclides, &
         & ' nuclides retrieved. now writing nuclide dictionary...'
         call do_parse_nuclides(nuclib,nuclide_dict,ierr)
-        write(error_unit,'(a//)') 'done.'
+        write(error_unit,'(/,a,/,/)') 'done.'
 !         call integer_dict_lookup(nuclide_dict, 'fe56', indx, ierr)
 !         print *, nuclib% name(indx), nuclib% A(indx), nuclib% Z(indx)
 !         print *,nuclib% name(nuclib% Nnuclides), nuclib% A(nuclib% Nnuclides), nuclib% Z(nuclib% Nnuclides)
@@ -49,11 +53,19 @@ contains
         write(error_unit,'(a)')  &
         & 'loading reaclib from '//trim(reaclib_filename)
         call do_load_reaclib(reaclib_filename,reaclib,ierr)
-        write(error_unit,'(a,i0,a)') 'done. ',reaclib% Nentries, &
-        & ' entries retrieved. now writing reaction dictionary...'
+        write(error_unit,'(/,a,i0,a)') 'done. ',reaclib% Nentries, &
+        & ' entries retrieved. now writing reaction dictionary'
         call do_parse_rates(reaclib,rate_dict,ierr)
-        write(error_unit,'(a,i0,a)') 'done. ',integer_dict_size(rate_dict), &
-        & ' unique rates found.'
+        write(error_unit,'(/,a,i0,a)') 'done. ', &
+        &   integer_dict_size(rate_dict),' unique rates found.'
+        write(error_unit,'(/,/,a)') &
+        &   'loading starlib from '//trim(starlib_filename)
+        call do_load_starlib(starlib_filename,starlib,ierr)
+        write(error_unit,'(/,a,i0,a)') 'done. ',starlib% Nentries,  &
+        &   ' entries retrieved. now writing reaction dictionary'
+        call do_parse_starlib(starlib,starlib_dict,ierr)
+        write(error_unit,'(/,a/,i0,a)') 'done. ', &
+        &   integer_dict_size(starlib_dict),' unique rates found.'
     end subroutine netJina_init
 
     subroutine get_nuclide_properties(nuclide, nuclib, nuclide_dict, &

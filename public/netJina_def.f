@@ -41,7 +41,7 @@ module netJina_def
     integer, parameter :: max_nstarlib = 80000
     ! data storage parameters for starlib
     integer, parameter :: number_starlib_temps = 60
-    integer, parameter :: starlib_max_species_per_reaction = 4
+    integer, parameter :: starlib_max_species_per_reaction = 6
 
     
     ! table of elements; note that hydrogen is referred to as 'p' in the table 
@@ -142,7 +142,6 @@ module netJina_def
         integer, dimension(:), allocatable :: chapter
         character(len=iso_name_length), dimension(:,:), allocatable :: species
         character(len=iso_name_length), dimension(:), allocatable :: label
-        character,dimension(:), allocatable :: reaction_flag
         character,dimension(:), allocatable :: reverse_flag
         real(dp),dimension(:), allocatable :: Qvalue
         real(dp),dimension(:,:), allocatable :: T9

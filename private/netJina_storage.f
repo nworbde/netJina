@@ -59,5 +59,37 @@ contains
         if (allocated(r% N_rate_terms)) deallocate(r% N_rate_terms)
         r% Nentries = 0
     end subroutine free_reaclib_data
+    
+    subroutine allocate_starlib_data(r, n, ierr)
+        use netJina_def
+        type(starlib_data), intent(out) :: r
+        integer, intent(in) :: n
+        integer, intent(out) :: ierr
+        
+        ierr = 0
+        allocate(r% chapter(n),  &
+        &   r% species(starlib_max_species_per_reaction,n), &
+        &   r% label(n), &
+        &   r% reverse_flag(n), &
+        &   r% Qvalue(n), &
+        &   r% T9(number_starlib_temps,n), &
+        &   r% rate(number_starlib_temps,n), &
+        &   r% uncertainty(number_starlib_temps,n), stat=ierr)
+        r% Nentries = n
+    end subroutine allocate_starlib_data
+
+    subroutine free_starlib_data(r)
+        use netJina_def
+        type(starlib_data), intent(inout) :: r
+        if (allocated(r% chapter)) deallocate(r% chapter)
+        if (allocated(r% species)) deallocate(r% species)
+        if (allocated(r% label)) deallocate(r% label)
+        if (allocated(r% reverse_flag)) deallocate(r% reverse_flag)
+        if (allocated(r% Qvalue)) deallocate(r% Qvalue)
+        if (allocated(r% T9)) deallocate(r% T9)
+        if (allocated(r% rate)) deallocate(r% rate)
+        if (allocated(r% uncertainty)) deallocate(r% uncertainty)
+        r% Nentries = 0
+    end subroutine free_starlib_data
 
 end module netJina_storage

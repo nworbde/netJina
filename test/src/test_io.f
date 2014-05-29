@@ -6,12 +6,13 @@ program test_io
     
     character(len=*), parameter :: datadir = '../data'
     type(reaclib_data) :: reaclib
+    type(starlib_data) :: starlib
     type(nuclib_data) :: nuclib
     integer :: ierr
     integer :: i,j,nin,nout, Z, N
     real(dp) :: A, S, E, partition_fcn(npfcn)
     character(len=provenance_length) :: provenance
-    type(integer_dict), pointer :: rates_dict=>null(), nuclide_dict=>null()
+    type(integer_dict), pointer :: rates_dict=>null(), nuclide_dict=>null(), starlib_dict=>null()
     integer :: max_terms, indx(1), dindx, i_rate
     character(len=max_id_length) :: handle
     character(len=iso_name_length) :: iso
@@ -22,7 +23,8 @@ program test_io
     real(dp), dimension(N_bdat_channels) :: q
     logical, dimension(N_bdat_channels) :: rate_mask
     
-    call netJina_init(datadir,nuclib,nuclide_dict,reaclib,rates_dict,ierr)
+    call netJina_init(datadir,nuclib,nuclide_dict,reaclib, &
+    &   starlib,rates_dict,starlib_dict,ierr)
     if (ierr /= 0) then
         write(error_unit,*) 'failure in initialization ',ierr
         stop
