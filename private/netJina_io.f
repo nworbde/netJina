@@ -25,21 +25,28 @@ module netJina_io
     
 contains
     
-    subroutine do_load_nuclib(filename,nuclides,ierr)
+    subroutine do_load_nuclib(filename,cache_filename,nuclides,ierr)
         use, intrinsic :: iso_fortran_env, only: iostat_end, error_unit
         use netJina_def
         use netJina_storage
         use utils_lib, only: alloc_iounit, free_iounit
         
-        character(len=*), intent(in) :: filename
+        character(len=*), intent(in) :: filename,cache_filename
         type(nuclib_data), intent(out) :: nuclides
         integer, intent(out) :: ierr
         type(nuclib_data) :: tmp_n
         integer :: i, iso_count,ios, nuclib_unitno
         character(len=80) :: buffer
         real, dimension(24) :: pfcn
-    
+        logical :: have_cache
+        
         ierr = 0
+        inquire(file=cache_filename,exist=have_cache)
+        if (have_cache) then
+            call do_read_nuclib_cache(cache_filename,nuclides,ierr)
+            if (ierr == 0) return
+        end if
+        
         nuclib_unitno = alloc_iounit(ierr)
         if (io_failure('allocating iounit',ierr)) return
         
@@ -77,6 +84,10 @@ contains
         call copy_nuclib_data(tmp_n,nuclides,ierr)
         if (io_failure('copying nuclib data',ierr)) return
         call free_nuclib_data(tmp_n)
+        
+        if (.not.have_cache) then
+            call do_write_nuclib_cache(cache_filename,nuclides,ierr)
+        end if
     contains
         
         subroutine copy_nuclib_data(old_data,new_data,ierr)
@@ -120,6 +131,62 @@ contains
         end do
         call integer_dict_create_hash(nuclide_dict,ierr)
     end subroutine do_parse_nuclides
+
+    subroutine do_read_nuclib_cache(filename,nuclides,ierr)
+        use netJina_def
+        use netJina_storage
+        character(len=*), intent(in) :: filename
+        type(nuclib_data), intent(out) :: nuclides
+        integer, intent(out) :: ierr
+        integer :: cache_unitno, n
+        
+        ierr = 0
+        
+        open(newunit=cache_unitno, file=trim(filename), iostat=ierr, &
+        &   action="read",status="old",form="unformatted")
+        if (io_failure('opening '//trim(filename),ierr)) return
+        
+        read(cache_unitno) n
+        call allocate_nuclib_data(nuclides,n, ierr)
+        read(cache_unitno) nuclides% name
+        read(cache_unitno) nuclides% provenance
+        read(cache_unitno) nuclides% A
+        read(cache_unitno) nuclides% Z
+        read(cache_unitno) nuclides% N
+        read(cache_unitno) nuclides% spin
+        read(cache_unitno) nuclides% mass_excess
+        read(cache_unitno) nuclides% pfcn
+        read(cache_unitno) pfcn_T9
+        close(cache_unitno)
+    end subroutine do_read_nuclib_cache
+     
+    subroutine do_write_nuclib_cache(filename,nuclides,ierr)
+        use netJina_def
+        character(len=*), intent(in) :: filename
+        type(nuclib_data), intent(in) :: nuclides
+        integer, intent(out) :: ierr
+        integer :: cache_unitno
+        
+        ierr = 0
+        if (nuclides% Nnuclides == 0) return
+        
+        open(newunit=cache_unitno, file=trim(filename), iostat=ierr, &
+        &   action="write",form="unformatted")
+        if (io_failure('opening '//trim(filename),ierr)) return
+        
+        write(cache_unitno) nuclides% Nnuclides
+        write(cache_unitno) nuclides% name
+        write(cache_unitno) nuclides% provenance
+        write(cache_unitno) nuclides% A
+        write(cache_unitno) nuclides% Z
+        write(cache_unitno) nuclides% N
+        write(cache_unitno) nuclides% spin
+        write(cache_unitno) nuclides% mass_excess
+        write(cache_unitno) nuclides% pfcn
+        write(cache_unitno) pfcn_T9
+
+        close(cache_unitno)
+    end subroutine do_write_nuclib_cache
     
     subroutine do_load_reaclib(filename,rates,ierr)
         use, intrinsic :: iso_fortran_env, only: iostat_end, error_unit
