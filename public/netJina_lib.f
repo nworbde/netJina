@@ -168,6 +168,13 @@ contains
         character(len=max_id_length), intent(out) :: handle
         handle = do_generate_handle(ratelib% species(:,indx), &
         & nJ_Nin(ratelib% chapter(indx)), nJ_Nout(ratelib% chapter(indx)))
+        
+        ! p+p->d is special
+        if (trim(handle) == 'nJ_p_p_to_d' .and.  &
+        &   ratelib% reaction_flag(indx) == 'e') then
+            handle = trim(handle)//'_e'
+        end if
+        
     end subroutine get_handle
     
     subroutine make_channel_handles(isotope,nuclib,nuclide_dict,handles,ierr)

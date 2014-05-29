@@ -15,6 +15,7 @@ module netJina_def
     ! mass, spin, partition function are described.
     integer, parameter :: iso_name_length = 5
     integer, parameter :: provenance_length = 6
+    integer, parameter :: reaction_reference_length = 4
     ! maximum number of nuclides in nucchem database
     integer, parameter :: max_nnuclib=10000
     ! no. entries in partition fcn table
@@ -127,14 +128,14 @@ module netJina_def
         integer :: Nentries
         integer,dimension(:),allocatable :: chapter
         character(len=iso_name_length),dimension(:,:),allocatable :: species
-        character(len=iso_name_length),dimension(:),allocatable :: label
+        character(len=reaction_reference_length),dimension(:),allocatable :: label
+        character,dimension(:),allocatable :: reaction_flag
         character,dimension(:),allocatable :: reverse_flag
         real(dp),dimension(:),allocatable :: Qvalue
     end type rate_data
     
     ! storage container for reaclib file
     type, extends(rate_data) :: reaclib_data
-        character,dimension(:),allocatable :: reaction_flag
         real(dp),dimension(:,:),allocatable :: coefficients
         integer,dimension(:),allocatable :: N_rate_terms
     end type reaclib_data
