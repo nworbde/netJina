@@ -3,11 +3,18 @@ Tools for working with [JINA reaclib](https://groups.nscl.msu.edu/jina/reaclib/d
 
 ## Dependencies
 
-*   The code is written in FORTRAN, and uses the `utils` and `const` modules from [MESA](http://mesa.sourceforge.net). Compilation and testing have been done with the MESA SDK and with v6022 of MESA.
+*   The code is written in FORTRAN, and uses the `utils` and `const` modules from [MESA](http://mesa.sourceforge.net). Compilation and testing have been done with the MESA SDK and with a patched version v6208 of MESA.
 
-*   The code requires two databases, one containing the nuclide database and the other containing the reaclib database.  The script `fetch_data` fetches both from https://dl.dropboxusercontent.com/u/52649885/netJina/ .
+*   The code requires three databases, containing the nuclide database, the reaclib database, and the starlib database.  The script `fetch_data` fetches the nuclide and reaclib databases from https://dl.dropboxusercontent.com/u/52649885/netJina/, and the starlib database from http://starlib.physics.unc.edu/.
 
 ## Installation
+
+Unfortunately, you need to patch the `utils` module of v6208 of MESA. This necessity will disappear once the latest version of MESA is released.
+
+1.  Copy `utils_patch` into the `utils` directory of your MESA v6022 tree.
+2.  Go to that directory: `cd $MESA_DIR/utils`
+2.  Run `patch < utils_patch`
+3.  Remake the library: `./i1`
 
 ### Basic
 
@@ -22,7 +29,7 @@ Look in `test/src/test_io.f` for an example of source code, and in `test/make/ma
 
 In summary, you initialize the module
 
-    call netJina_init(datadir,nuclib,nuclide_dict,reaclib,rates_dict,ierr)
+    call netJina_init(datadir,nuclib,nuclide_dict,reaclib,starlib,rates_dict,starlib_dict,ierr)
     if (ierr /= 0) then
         write(error_unit,*) 'failure in initialization ',ierr
         stop
@@ -32,6 +39,7 @@ where
     
     character(len=*), parameter :: datadir = '../data'
     type(reaclib_data) :: reaclib
+    type(starlib_data) :: starlib
     type(nuclib_data) :: nuclib
     integer :: ierr
     type(integer_dict), pointer :: rates_dict=>null(), nuclide_dict=>null()
@@ -59,7 +67,7 @@ This returns the handles -- identifiers for the reactions -- for the following c
 	i_gn							:= (g,n)
 	i_pn							:= (p,n)
 
-Now that you have the handles, you can get the reaction parameters.
+Now that you have the handles, you can get the reaction parameters.  From reaclib:
 
     write(output_unit,'(/,a)') 'What are the reaction parameters for ca37'
     call get_bdat_channels(reaclib,rates_dict,handles,n_coeff,rate_coefficients,q,rate_mask)
@@ -69,10 +77,23 @@ Now that you have the handles, you can get the reaction parameters.
     real(dp), dimension(N_bdat_channels) :: q
     logical, dimension(N_bdat_channels) :: rate_mask
 
+From starlib:
+
+    write(output_unit,'(/,a)') 'with starlib...'
+    call get_bdat_rates(starlib,starlib_dict,handles,T9,rate,uncertainty,q,rate_mask)
+
+    real(dp), dimension(number_starlib_temps,N_bdat_channels) :: T9, rate, uncer
+    tainty
+    real(dp), dimension(N_bdat_channels) :: q
+    logical, dimension(N_bdat_channels) :: rate_mask
+
 Becauase reaclib has a standard seven-coefficient fit per rate, some reactions have multiple rate entries: the total reaction rate is the sum of the individual terms.  Thus, for the channel with index `channel_index`, `rate_coefficients(1:7,channel_index)` has the coefficients for the first entry, `rate_coefficients(8:14,channel_index)` has the second, with a total of `7*n_coeff(channel_index)` coefficients for that reactions.  The Q-values are stored in `q(channel_index)`. Finally, logical array `rate_mask` contains for each channel the value `.TRUE.` if the rate is present in reaclib and is a forward rate.
 	
 ## How it works
 After reading in the `reaclib` database, the code generates for each rate a "handle" and uses that to build a dictionary.  When called with an (isotope, channel) pair a handle is easily constructed and used to look up the HEAD rate in the database. The number of entries for that reaction is stored in the database, so the code just needs to read those terms and pack them into the output.
 
 ## To do
-The generation of handles and returning of reaction parameters should be handled by one wrapper routine, that would also take care of exceptions.
+*   The generation of handles and returning of reaction parameters should be handled by one wrapper routine, that would also take care of exceptions.
+*   Cache the data directories; starlib, in particular, is slow to load
+*   Catch case of electron captures, plus different channels for p+p->d.
+
