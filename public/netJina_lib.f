@@ -31,36 +31,39 @@ contains
         integer, intent(out) :: ierr
 
         character(len=160) :: reaclib_filename, nuclib_filename, starlib_filename
+        character(len=160) :: reaclib_cache, nuclib_cache, starlib_cache
         integer :: indx
         
         nuclib_filename = trim(datadir)//'/'//nuclib_db
         reaclib_filename = trim(datadir)//'/'//reaclib_db
         starlib_filename = trim(datadir)//'/'//starlib_db
+
+        nuclib_cache = trim(datadir)//'/cache/'//nuclib_db//'.bin'
+        reaclib_cache = trim(datadir)//'/cache/'//reaclib_db//'.bin'
+        starlib_cache = trim(datadir)//'/cache/'//starlib_db//'.bin'
         
         ierr = 0
         write(error_unit,'(a)')  &
         & 'loading nuclib from '//trim(nuclib_filename)
-        call do_load_nuclib(nuclib_filename,nuclib,ierr)
+        call do_load_nuclib(nuclib_filename,nuclib_cache,nuclib,ierr)
         write(error_unit,'(/,a,i0,a)')  &
         & 'done. ',nuclib% Nnuclides, &
         & ' nuclides retrieved. now writing nuclide dictionary...'
         call do_parse_nuclides(nuclib,nuclide_dict,ierr)
-        write(error_unit,'(/,a,/,/)') 'done.'
-!         call integer_dict_lookup(nuclide_dict, 'fe56', indx, ierr)
-!         print *, nuclib% name(indx), nuclib% A(indx), nuclib% Z(indx)
-!         print *,nuclib% name(nuclib% Nnuclides), nuclib% A(nuclib% Nnuclides), nuclib% Z(nuclib% Nnuclides)
+        write(error_unit,'(/,a)') 'done.'
         
         write(error_unit,'(a)')  &
         & 'loading reaclib from '//trim(reaclib_filename)
-        call do_load_reaclib(reaclib_filename,reaclib,ierr)
+        call do_load_reaclib(reaclib_filename,reaclib_cache,reaclib,ierr)
         write(error_unit,'(/,a,i0,a)') 'done. ',reaclib% Nentries, &
         & ' entries retrieved. now writing reaction dictionary'
         call do_parse_rates(reaclib,rate_dict,ierr)
         write(error_unit,'(/,a,i0,a)') 'done. ', &
         &   integer_dict_size(rate_dict),' unique rates found.'
+
         write(error_unit,'(/,/,a)') &
         &   'loading starlib from '//trim(starlib_filename)
-        call do_load_starlib(starlib_filename,starlib,ierr)
+        call do_load_starlib(starlib_filename,starlib_cache,starlib,ierr)
         write(error_unit,'(/,a,i0,a)') 'done. ',starlib% Nentries,  &
         &   ' entries retrieved. now writing reaction dictionary'
         call do_parse_starlib(starlib,starlib_dict,ierr)

@@ -5,3 +5,5 @@ make clean
 cd ../test/make
 make clean
 cd ../..
+echo "removing cache"
+rm -rf data/cache
