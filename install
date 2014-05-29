@@ -93,6 +93,12 @@ if [ $ROOTDIR != $THISDIR ]; then
         cp data/$src $DATADIR
         check_okay
     done
+    mkdir -p $DATADIR/cache
+    check_okay
+    for src in ${DATA_DBS[*]}; do
+        cp data/cache/${src}.bin $DATADIR/cache
+        check_okay
+    done
 fi
 
 echo
