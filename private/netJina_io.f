@@ -204,7 +204,7 @@ contains
     subroutine do_parse_rates(reaclib,rate_dict,ierr)
         use, intrinsic :: iso_fortran_env, only : error_unit
         use utils_def, only: integer_dict
-        use utils_lib, only: integer_dict_define_and_check
+        use utils_lib, only: integer_dict_define_and_check, integer_dict_free
         use netJina_def
         
         type(reaclib_data), intent(inout) :: reaclib
@@ -354,7 +354,7 @@ contains
     subroutine do_parse_starlib(starlib,starlib_dict,ierr)
         use, intrinsic :: iso_fortran_env, only : error_unit
         use utils_def, only: integer_dict
-        use utils_lib, only: integer_dict_define_and_check
+        use utils_lib, only: integer_dict_define_and_check, integer_dict_free
         use netJina_def
         
         type(starlib_data), intent(inout) :: starlib

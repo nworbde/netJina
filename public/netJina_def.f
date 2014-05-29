@@ -3,13 +3,12 @@
 !   defines data layout for the JINA reaclib database
 !   Edward Brown, Michigan State University
 !
-!   Requires installation of MESA (mesa.sourceforge.net) utils lib, v 6022
+!   Requires installation of MESA (mesa.sourceforge.net) v 6022 for utils and 
+!   const modules
 !
 
 module netJina_def
     use const_def, only: sp,dp
-    use utils_def, only: integer_dict
-    use utils_lib, only: integer_dict_free
 
     ! data storage parameter for nuclib
     ! each isotope has a name and "provenance" -- a reference to where the 
@@ -123,39 +122,28 @@ module netJina_def
     integer, dimension(nchapters) :: nJ_Nin = (/1,1,1,2,2,2,2,3,3,4,1/)
     integer, dimension(nchapters) :: nJ_Nout = (/1,2,3,1,2,3,4,1,2,2,4/)
     
-    ! storage container for reaclib file
-    type reaclib_data
+    ! storage containers for rate data
+    type rate_data
         integer :: Nentries
         integer,dimension(:),allocatable :: chapter
         character(len=iso_name_length),dimension(:,:),allocatable :: species
         character(len=iso_name_length),dimension(:),allocatable :: label
-        character,dimension(:),allocatable :: reaction_flag
         character,dimension(:),allocatable :: reverse_flag
         real(dp),dimension(:),allocatable :: Qvalue
+    end type rate_data
+    
+    ! storage container for reaclib file
+    type, extends(rate_data) :: reaclib_data
+        character,dimension(:),allocatable :: reaction_flag
         real(dp),dimension(:,:),allocatable :: coefficients
         integer,dimension(:),allocatable :: N_rate_terms
     end type reaclib_data
     
     ! storage container for starlib file
-    type starlib_data
-        integer :: Nentries
-        integer, dimension(:), allocatable :: chapter
-        character(len=iso_name_length), dimension(:,:), allocatable :: species
-        character(len=iso_name_length), dimension(:), allocatable :: label
-        character,dimension(:), allocatable :: reverse_flag
-        real(dp),dimension(:), allocatable :: Qvalue
+    type, extends(rate_data) :: starlib_data
         real(dp),dimension(:,:), allocatable :: T9
         real(dp),dimension(:,:), allocatable :: rate
         real(dp),dimension(:,:), allocatable :: uncertainty
     end type starlib_data
-
-    ! container to hold locations for all terms for a given rate. Reaclib uses a
-    ! seven-term fit for each entry.  If this is insufficient, it uses more
-    ! than one entry per reaction.
-    type rate_location
-        character(len=max_id_length) :: reaction_handle
-        integer :: nterms
-        integer, dimension(max_terms_per_rate) :: indices
-    end type rate_location
     
 end module netJina_def

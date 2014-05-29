@@ -118,7 +118,6 @@ contains
     subroutine get_bdat_channels(reaclib,rates_dict, &
     & handles,n_coeff,rate_coefficients,q,rate_mask)
         use utils_def, only: integer_dict
-        use utils_lib, only: integer_dict_lookup
         use netJina_def
         use netJina_bdat, only: do_get_bdat_channels
         
@@ -137,15 +136,35 @@ contains
         
     end subroutine get_bdat_channels
 
-    subroutine get_handle(reaclib,indx,handle)
-        use netJina_def, only: reaclib_data, nJ_Nin, nJ_Nout, max_id_length
+    subroutine get_bdat_rates(starlib,rates_dict, &
+    &   handles,T9,rate,uncertainty,q,rate_mask)
+        use utils_def, only: integer_dict
+        use netJina_def
+        use netJina_bdat, only: do_get_bdat_rates
+        
+        type(starlib_data), intent(in) :: starlib
+        type(integer_dict), pointer :: rates_dict
+        character(len=max_id_length), intent(in),  &
+        &   dimension(N_bdat_channels) :: handles
+        real(dp), dimension(number_starlib_temps,N_bdat_channels), &
+        &   intent(out) :: T9,rate,uncertainty
+        real(dp), intent(out), dimension(N_bdat_channels) :: q
+        logical, intent(out), dimension(N_bdat_channels) :: rate_mask
+        
+        call do_get_bdat_rates(starlib,rates_dict, &
+        &   handles,T9,rate,uncertainty,q,rate_mask)
+        
+    end subroutine get_bdat_rates
+
+    subroutine get_handle(ratelib,indx,handle)
+        use netJina_def
         use netJina_io, only: do_generate_handle
         
-        type(reaclib_data), intent(in) :: reaclib
+        class(rate_data), intent(in) :: ratelib
         integer, intent(in) :: indx
         character(len=max_id_length), intent(out) :: handle
-        handle = do_generate_handle(reaclib% species(:,indx), &
-        & nJ_Nin(reaclib% chapter(indx)), nJ_Nout(reaclib% chapter(indx)))
+        handle = do_generate_handle(ratelib% species(:,indx), &
+        & nJ_Nin(ratelib% chapter(indx)), nJ_Nout(ratelib% chapter(indx)))
     end subroutine get_handle
     
     subroutine make_channel_handles(isotope,nuclib,nuclide_dict,handles,ierr)
@@ -162,15 +181,15 @@ contains
         call do_make_channel_handles(isotope,nuclib,nuclide_dict,handles,ierr)
     end subroutine make_channel_handles
     
-    function reaction_string(reaclib,indx) result(str)
+    function reaction_string(ratelib,indx) result(str)
         use netJina_def
-        type(reaclib_data), intent(in) :: reaclib
+        class(rate_data), intent(in) :: ratelib
         integer, intent(in) :: indx
         character(len=length_reaction_string) :: str
         character(len=length_reaction_string) :: str_nxt
         
         str_nxt = ''
-    	select case(reaclib% chapter(indx))
+    	select case(ratelib% chapter(indx))
     		case(r_one_one)
     	   	call write_n_to_m(1,1)
     		case(r_one_two)
@@ -203,17 +222,17 @@ contains
            	integer :: j
             do j = 1,n-1
                 str_nxt = trim(str_nxt)//' '// &
-                & trim(adjustl(reaclib% species(j, indx)))//' +'
+                & trim(adjustl(ratelib% species(j, indx)))//' +'
         	end do
             str_nxt = trim(str_nxt)//' '// &
-            & trim(adjustl(reaclib% species(n,indx)))//' ==>'
+            & trim(adjustl(ratelib% species(n,indx)))//' ==>'
         	do j=n+1,n+m-1
         	    str_nxt = trim(str_nxt)//' '// &
-        	    & trim(adjustl(reaclib% species(j, indx))) &
+        	    & trim(adjustl(ratelib% species(j, indx))) &
         	    & //' +' 
         	end do
             str_nxt = trim(str_nxt)//' '// &
-            & trim(adjustl(reaclib% species(n+m,indx)))
+            & trim(adjustl(ratelib% species(n+m,indx)))
     	end subroutine write_n_to_m	
         
     end function reaction_string

@@ -37,6 +37,38 @@ contains
         end do
     end subroutine do_get_bdat_channels
     
+    subroutine do_get_bdat_rates(starlib,rates_dict, &
+    & handles,T9,rate,uncertainty,q,rate_mask)
+        use utils_def, only: integer_dict
+        use utils_lib, only: integer_dict_lookup
+        use netJina_def
+        
+        type(starlib_data), intent(in) :: starlib
+        type(integer_dict), pointer :: rates_dict
+        character(len=max_id_length), intent(in),  &
+        & dimension(N_bdat_channels) :: handles
+        real(dp), dimension(number_starlib_temps,N_bdat_channels), &
+        & intent(out) :: T9,rate,uncertainty
+        real(dp), intent(out), dimension(N_bdat_channels) :: q
+        logical, intent(out), dimension(N_bdat_channels) :: rate_mask
+        integer :: ierr
+        integer :: i, indx
+
+        ierr = 0
+        do i = 1, N_bdat_channels
+            call integer_dict_lookup(rates_dict,trim(handles(i)),indx,ierr)
+            if (ierr /= 0) then
+                rate_mask(i) = .FALSE.
+                cycle
+            end if
+            q(i) = starlib% Qvalue(indx)
+            rate_mask(i) = (starlib% reverse_flag(indx) /= 'v')
+            T9(:,i) = starlib% T9(:,indx)
+            rate(:,i) = starlib% rate(:,indx)
+            uncertainty(:,i) = starlib% uncertainty(:,indx)
+        end do
+    end subroutine do_get_bdat_rates
+    
     subroutine do_make_channel_handles(isotope,nuclib,nuclide_dict,handles,ierr)
         use netJina_def
         use utils_def
