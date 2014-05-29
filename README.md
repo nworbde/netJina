@@ -9,7 +9,7 @@ Tools for working with [JINA reaclib](https://groups.nscl.msu.edu/jina/reaclib/d
 
 ## Installation
 
-### Prerequisie
+### Prerequisite
 Unfortunately, you need to patch the `utils` module of v6208 of MESA. This necessity will disappear once the latest version of MESA is released.
 
 1.  Copy `utils_patch` into the `utils` directory of your MESA v6022 tree.
