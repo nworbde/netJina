@@ -3,7 +3,7 @@
 !   low-level read/write routines for the JINA reaclib database
 !   Edward Brown, Michigan State University
 !
-!   Requires installation of MESA (mesa.sourceforge.net) utils lib, v 6022
+!   Requires installation of MESA (mesa.sourceforge.net) utils lib, v 6480
 !
 
 module netJina_io
@@ -20,6 +20,9 @@ module netJina_io
     character(len=*), parameter :: reaclib_line2 = '(4es13.6)'
     character(len=*), parameter :: reaclib_line3 = '(3es13.6)'
 
+    ! the starlib header format
+    character(len=*), parameter :: header_format = '(a64)'
+    
 contains
     
     subroutine do_load_nuclib(filename,nuclides,ierr)
@@ -201,7 +204,7 @@ contains
     subroutine do_parse_rates(reaclib,rate_dict,ierr)
         use, intrinsic :: iso_fortran_env, only : error_unit
         use utils_def, only: integer_dict
-        use utils_lib, only: integer_dict_define_and_check
+        use utils_lib, only: integer_dict_define_and_check, integer_dict_free
         use netJina_def
         
         type(reaclib_data), intent(inout) :: reaclib
@@ -214,8 +217,7 @@ contains
         
         if (associated(rate_dict)) call integer_dict_free(rate_dict)
         reaclib% N_rate_terms(:) = 1
-        write (error_unit, '(a)') 'generating handles'        
-
+        ierr = 0
         do i_rate = 1, reaclib% Nentries
             nin = nJ_Nin(reaclib% chapter(i_rate))
             nout = nJ_Nout(reaclib% chapter(i_rate))
@@ -230,8 +232,158 @@ contains
             if (mod(i_rate,1000) == 0)  &
             & write (error_unit,'(a)',advance='no') '.'
         end do
-        write (error_unit,'(a)') 'done'
     end subroutine do_parse_rates
+    
+    subroutine do_load_starlib(filename,rates,ierr)
+        use, intrinsic :: iso_fortran_env, only: iostat_end, error_unit
+        use netJina_def
+        use netJina_storage
+        use utils_lib, only: alloc_iounit, free_iounit
+        
+        character(len=*), intent(in) :: filename
+        type(starlib_data), intent(out) :: rates
+        integer, intent(out) :: ierr
+        integer :: i, starlib_unitno, count, iend, j
+        type(starlib_data) :: tmp_rates
+        character(len=64) :: header
+        real(dp), dimension(number_starlib_temps) :: T9,rate,uncertainty
+        integer :: chapter
+        integer :: ns
+        character(len=iso_name_length),  &
+        &   dimension(starlib_max_species_per_reaction) :: &
+        & species
+        character(len=iso_name_length) :: prov
+        character :: reverse
+        real(dp) :: q
+        
+        ierr = 0
+        starlib_unitno = alloc_iounit(ierr)
+        if (io_failure('allocating iounit',ierr)) return
+        
+        open(unit=starlib_unitno, file=trim(filename), iostat=ierr, &
+        & status="old", action="read")
+        if (io_failure('opening '//trim(filename),ierr)) return
+
+        ! allocate a temporary to hold the library
+        call allocate_starlib_data(tmp_rates,max_nstarlib,ierr)
+        if (io_failure('allocating storage',ierr)) return
+
+        count = 0
+        do i = 1, max_nstarlib
+            read(unit=starlib_unitno, fmt=header_format, iostat=iend) header
+            if (iend == iostat_end ) exit
+            if (io_failure('reading starlib header',ierr)) return
+            call parse_header(header,chapter,ns,species,prov,reverse,q)
+            
+            read(unit=starlib_unitno,fmt=*,iostat=ierr) &
+            &    (T9(j),rate(j),uncertainty(j),j=1,number_starlib_temps)
+            if (io_failure('reading starlib rates',ierr)) return
+            
+            tmp_rates% chapter(i) = chapter
+            tmp_rates% species(:,i) = species
+            tmp_rates% label(i) = prov
+            tmp_rates% reverse_flag(i) = reverse
+            tmp_rates% Qvalue(i) = q
+            tmp_rates% T9(:,i) = T9
+            tmp_rates% rate(:,i) = rate
+            tmp_rates% uncertainty(:,i) = uncertainty
+            count = count + 1
+            if (mod(count,1000) == 0)  &
+            &   write (error_unit,'(a)',advance='no') '.'
+            
+        end do
+        close(starlib_unitno)
+        call free_iounit(starlib_unitno)
+        tmp_rates% Nentries = count
+                
+        call copy_starlib_data(tmp_rates,rates,ierr)
+        if (io_failure('copying starlib data',ierr)) return
+        call free_starlib_data(tmp_rates)
+        
+    contains
+        subroutine parse_header(header,chapter,ns,species,prov,reverse,q)
+            character(len=64), intent(in) :: header
+            integer, intent(out) :: chapter
+            integer, intent(out) :: ns
+            character(len=iso_name_length), &
+            &  dimension(starlib_max_species_per_reaction), intent(out) :: &
+            &    species
+            character(len=iso_name_length), intent(out) :: prov
+            character, intent(out) :: reverse
+            real(dp), intent(out) :: q
+            character(len=iso_name_length), &
+            &   dimension(starlib_max_species_per_reaction) :: tmp_species
+            integer :: j,i
+        
+            read(header,'(i5,2(a5),4(a5),t44,a4,a1,t53,es12.5)')  &
+            &   chapter, tmp_species(:), prov, reverse, q
+        
+            species = ''
+            ns = 0
+            do j= 1, starlib_max_species_per_reaction
+                if (len_trim(tmp_species(j)) > 0) then
+                    ns = ns + 1
+                    species(ns) = adjustl(tmp_species(j))
+                end if
+            end do
+        
+        end subroutine parse_header
+     
+        subroutine copy_starlib_data(old_data,new_data,ierr)
+            type(starlib_data), intent(in) :: old_data
+            type(starlib_data), intent(out) :: new_data
+            integer, intent(out) :: ierr
+            integer :: n
+        
+            if (new_data% Nentries /= 0) call free_starlib_data(new_data)
+            call allocate_starlib_data(new_data,old_data% Nentries, ierr)
+            if (ierr /= 0) return
+        
+            n = old_data% Nentries
+            new_data% chapter(:) = old_data% chapter(1:n)
+            new_data% species(:,:) = old_data% species(:,1:n)
+            new_data% label(:) = old_data% label(1:n)
+            new_data% reverse_flag(:) = old_data% reverse_flag(1:n)
+            new_data% Qvalue(:) = old_data% Qvalue(1:n)
+            new_data% T9(:,:) = old_data% T9(:,1:n)
+            new_data% rate(:,:) = old_data% rate(:,1:n)
+            new_data% uncertainty(:,:) = old_data% uncertainty(:,1:n)
+        end subroutine copy_starlib_data
+    end subroutine do_load_starlib    
+    
+    subroutine do_parse_starlib(starlib,starlib_dict,ierr)
+        use, intrinsic :: iso_fortran_env, only : error_unit
+        use utils_def, only: integer_dict
+        use utils_lib, only: integer_dict_define_and_check, integer_dict_free
+        use netJina_def
+        
+        type(starlib_data), intent(inout) :: starlib
+        type(integer_dict), pointer:: starlib_dict
+        integer, intent(out) :: ierr
+        integer :: i_rate, nin, nout, ikey, indx, nterms
+        character(len=max_id_length) :: handle
+        integer :: i_head
+        logical :: duplicate
+        
+        if (associated(starlib_dict)) call integer_dict_free(starlib_dict)      
+        ierr = 0
+        do i_rate = 1, starlib% Nentries
+            nin = nJ_Nin(starlib% chapter(i_rate))
+            nout = nJ_Nout(starlib% chapter(i_rate))
+            handle = do_generate_handle(starlib% species(:,i_rate), nin, nout)
+            ! p + p -> d has two channels
+            if (trim(handle) == 'nJ_p_p_to_d') &
+            &   handle = trim(handle)//trim(starlib% label(i_rate))
+
+            call integer_dict_define_and_check(starlib_dict, &
+            &   trim(handle),i_rate,duplicate,ierr)
+            if (duplicate) then
+                write(error_unit,'(a)') trim(handle)//' is duplicate'
+            end if
+            if (mod(i_rate,1000) == 0)  &
+            & write (error_unit,'(a)',advance='no') '.'
+        end do
+    end subroutine do_parse_starlib
     
     function do_generate_handle(species,nin,nout) result(handle)
         use netJina_def

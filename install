@@ -31,7 +31,8 @@ MODS=(  netjina_bdat.mod
         netjina_lib.mod
         netjina_storage.mod )
 DATA_DBS=(  reaclib_db
-            nuclib_db )
+            nuclib_db
+            starlib_db )
 
 # process options
 case "$1" in

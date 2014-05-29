@@ -20,7 +20,10 @@ $(TEST_TARGET): $(TEST_OBJS) $(TEST_LIBS)
 test_dict: test_dict.o $(TEST_LIBS)
 	$(LOADER) $(FCopenmp) -o $@ test_dict.o $(LOAD_OTHER)
 
-install: $(TEST_TARGET) test_dict
+digest_starlib: digest_starlib.o
+	$(LOADER) -o $@ digest_starlib.o
+
+install: $(TEST_TARGET) test_dict digest_starlib
 	cp $? $(TEST_DIR)
 
 clean:

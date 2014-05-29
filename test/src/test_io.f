@@ -6,12 +6,13 @@ program test_io
     
     character(len=*), parameter :: datadir = '../data'
     type(reaclib_data) :: reaclib
+    type(starlib_data) :: starlib
     type(nuclib_data) :: nuclib
     integer :: ierr
     integer :: i,j,nin,nout, Z, N
     real(dp) :: A, S, E, partition_fcn(npfcn)
     character(len=provenance_length) :: provenance
-    type(integer_dict), pointer :: rates_dict=>null(), nuclide_dict=>null()
+    type(integer_dict), pointer :: rates_dict=>null(), nuclide_dict=>null(), starlib_dict=>null()
     integer :: max_terms, indx(1), dindx, i_rate
     character(len=max_id_length) :: handle
     character(len=iso_name_length) :: iso
@@ -21,8 +22,10 @@ program test_io
     & rate_coefficients
     real(dp), dimension(N_bdat_channels) :: q
     logical, dimension(N_bdat_channels) :: rate_mask
+    real(dp), dimension(number_starlib_temps,N_bdat_channels) :: T9, rate, uncertainty
     
-    call netJina_init(datadir,nuclib,nuclide_dict,reaclib,rates_dict,ierr)
+    call netJina_init(datadir,nuclib,nuclide_dict,reaclib, &
+    &   starlib,rates_dict,starlib_dict,ierr)
     if (ierr /= 0) then
         write(error_unit,*) 'failure in initialization ',ierr
         stop
@@ -91,6 +94,23 @@ program test_io
     end do
     write(output_unit,'(54("_"))')
 
+    write (output_unit,'(/,a)') 'with starlib...'
+    iso = 'ca37'
+    call make_channel_handles(iso,nuclib,nuclide_dict,handles,ierr)
+    write(output_unit,'(54("_"),/,a2,tr2,a24,tr2,a24,/,54("="))')  &
+    & 'id','handle','reaction'
+    do i = 1, N_bdat_channels
+        call integer_dict_lookup(starlib_dict,trim(handles(i)),i_rate,ierr)
+        if (ierr == 0) then
+            write (output_unit,'(i2,tr2,a24,tr2,a24)') &
+            &  i,trim(adjustl(handles(i))), &
+            & trim(reaction_string(starlib,i_rate))
+        else
+            write (output_unit,*) i,trim(handles(i)), 'rate not found'
+        end if
+    end do
+    write(output_unit,'(54("_"))')
+
     write(output_unit,'(/,a)') 'What are the reaction parameters for ca37'
     call get_bdat_channels(reaclib,rates_dict, &
     & handles,n_coeff,rate_coefficients,q,rate_mask)
@@ -101,14 +121,32 @@ program test_io
         & trim(handles(i)),q(i),rate_mask(i),n_coeff(i)
     end do
     write(output_unit,'(54("_"))')
+
+    write(output_unit,'(/,a)') 'with starlib...'
+    call get_bdat_rates(starlib,starlib_dict, &
+    & handles,T9,rate,uncertainty,q,rate_mask)
+    write(output_unit,'(45("_"),/,a24,tr2,a10,tr2,a4,/,45("="))') &
+    & 'handle','q-value','mask'
+    do i=1, N_bdat_channels
+        write (output_unit,'(a24,tr2,f10.4,tr2,l4)') &
+        & trim(handles(i)),q(i),rate_mask(i)
+    end do
+    write(output_unit,'(54("_"))')
  
     write(output_unit,'(/,a)')  &
     & 'What are the reaction coefficients for ca37(g,p)k36?'
     write(output_unit,'(7(es12.4))') rate_coefficients(1:49,i_gp)
 
+    write(output_unit,'(/,a)') &
+    &   'What is the starlib rate for ca37(g,p)k36?'
+    write(output_unit,'(2(es12.4))') (T9(j,i_gp),rate(j,i_gp), j=1,number_starlib_temps)
+    
     write(output_unit,'(/,a)')  &
     & 'What are the reaction coefficients for ca37(n,a)ar34?'
     write(output_unit,'(7(es12.4))') rate_coefficients(1:7,i_na)
 
-    
+    write(output_unit,'(/,a)') &
+    &   'What is the starlib rate for ca37(n,a)ar34?'
+    write(output_unit,'(2(es12.4))') (T9(j,i_na),rate(j,i_na), j=1,number_starlib_temps)
+
 end program test_io

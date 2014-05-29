@@ -1,0 +1,111 @@
+Index: private/utils_dict.f
+===================================================================
+--- private/utils_dict.f	(revision 6208)
++++ private/utils_dict.f	(working copy)
+@@ -93,9 +93,10 @@
+       end subroutine find_key_entry
+       
+       
+-      recursive subroutine insert_node(node, root)
++      recursive subroutine insert_node(node, root, duplicate)
+          type (integer_dict), pointer :: node ! will be deallocated if a duplicate
+          type (integer_dict), pointer :: root
++         logical :: duplicate ! true if key was already defined
+          
+          integer :: height_left, height_right
+          logical, parameter :: dbg = .false.
+@@ -106,6 +107,7 @@
+             root% value = node% value
+             deallocate(node)
+             nullify(node)
++            duplicate = .true.
+             return
+          end if
+          
+@@ -113,7 +115,7 @@
+             if (.not. associated(root% left)) then
+                root% left => node
+             else
+-               call insert_node(node, root% left)
++               call insert_node(node, root% left, duplicate)
+             end if
+             height_left = root% left% height
+             height_right = height_of_right_branch(root)
+@@ -128,7 +130,7 @@
+             if (.not. associated(root% right)) then
+                root% right => node
+             else
+-               call insert_node(node, root% right)
++               call insert_node(node, root% right, duplicate)
+             end if
+             height_right = root% right% height
+             height_left = height_of_left_branch(root)
+@@ -238,16 +240,18 @@
+       end subroutine insert_node
+       
+       
+-      subroutine do_integer_dict_define(dict, key, value, ierr)
++      subroutine do_integer_dict_define(dict, key, value, duplicate, ierr)
+          type (integer_dict), pointer :: dict ! pass null for empty dict
+          character (len=*), intent(in) :: key
+          integer, intent(in) :: value
++         logical, intent(out) :: duplicate ! true if key was already defined
+          integer, intent(out) :: ierr
+          type (integer_dict), pointer :: node
+          logical, parameter :: dbg = .false.
+          ierr = 0
+          allocate(node, stat=ierr)
+          if (ierr /= 0) return
++         duplicate = .false.
+          node% key = key
+          node% value = value
+          node% height = 1
+@@ -262,7 +266,7 @@
+                deallocate(dict% hash)
+                nullify(dict% hash)
+             end if
+-            call insert_node(node, dict)
++            call insert_node(node, dict, duplicate)
+          end if
+          if (dbg) then ! check tree
+             write(*,*) 'done insert node ' // trim(key) // ' new root ' // trim(dict% key)
+Index: public/utils_lib.f
+===================================================================
+--- public/utils_lib.f	(revision 6208)
++++ public/utils_lib.f	(working copy)
+@@ -685,16 +685,28 @@
+       end function token
+       
+       
++      subroutine integer_dict_define_and_check(dict, key, value, duplicate, ierr)
++          use utils_dict
++          type (integer_dict), pointer :: dict ! pass null for empty dict
++          character (len=*), intent(in) :: key
++          integer, intent(in) :: value
++          logical, intent(out) :: duplicate ! true if key was already defined
++             ! if already defined, old value is replaced by new one.
++          integer, intent(out) :: ierr ! error if len_trim(key) > maxlen_key_string
++          call do_integer_dict_define(dict, key, value, duplicate, ierr)
++      end subroutine integer_dict_define_and_check
++
++
+       subroutine integer_dict_define(dict, key, value, ierr)
+-         use utils_dict
+-         type (integer_dict), pointer :: dict ! pass null for empty dict
+-         character (len=*), intent(in) :: key
+-         integer, intent(in) :: value
+-         integer, intent(out) :: ierr ! error if len_trim(key) > maxlen_key_string
+-         call do_integer_dict_define(dict, key, value, ierr)
++          use utils_def, only: integer_dict
++          type (integer_dict), pointer :: dict ! pass null for empty dict
++          character (len=*), intent(in) :: key
++          integer, intent(in) :: value
++          integer, intent(out) :: ierr ! error if len_trim(key) > maxlen_key_string
++          logical :: duplicate
++          call integer_dict_define_and_check(dict, key, value, duplicate, ierr)
+       end subroutine integer_dict_define
+       
+-      
+       subroutine integer_dict_create_hash(dict, ierr)
+          use utils_dict
+          type (integer_dict), pointer :: dict
