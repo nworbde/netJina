@@ -70,6 +70,7 @@ contains
         allocate(r% chapter(n),  &
         &   r% species(starlib_max_species_per_reaction,n), &
         &   r% label(n), &
+        &   r% reaction_flag(n), &
         &   r% reverse_flag(n), &
         &   r% Qvalue(n), &
         &   r% T9(number_starlib_temps,n), &
@@ -84,6 +85,7 @@ contains
         if (allocated(r% chapter)) deallocate(r% chapter)
         if (allocated(r% species)) deallocate(r% species)
         if (allocated(r% label)) deallocate(r% label)
+        if (allocated(r% reaction_flag)) deallocate(r% reaction_flag)
         if (allocated(r% reverse_flag)) deallocate(r% reverse_flag)
         if (allocated(r% Qvalue)) deallocate(r% Qvalue)
         if (allocated(r% T9)) deallocate(r% T9)

@@ -112,25 +112,6 @@ contains
         end subroutine copy_nuclib_data
         
     end subroutine do_load_nuclib    
-    
-    subroutine do_parse_nuclides(nuclib,nuclide_dict,ierr)
-        use utils_def, only: integer_dict
-        use utils_lib, only: integer_dict_define, &
-        & integer_dict_lookup, integer_dict_free, integer_dict_create_hash
-        use netJina_def
-        
-        type(nuclib_data), intent(in) :: nuclib
-        type(integer_dict), pointer:: nuclide_dict
-        integer, intent(out) :: ierr
-        integer :: indx, ikey
-         
-        if (associated(nuclide_dict)) call integer_dict_free(nuclide_dict)
-        do indx = 1, nuclib% Nnuclides
-            call integer_dict_define(nuclide_dict, &
-            & trim(adjustl(nuclib% name(indx))),indx,ierr)
-        end do
-        call integer_dict_create_hash(nuclide_dict,ierr)
-    end subroutine do_parse_nuclides
 
     subroutine do_read_nuclib_cache(filename,nuclides,ierr)
         use netJina_def
@@ -187,6 +168,25 @@ contains
 
         close(cache_unitno)
     end subroutine do_write_nuclib_cache
+   
+    subroutine do_parse_nuclides(nuclib,nuclide_dict,ierr)
+        use utils_def, only: integer_dict
+        use utils_lib, only: integer_dict_define, &
+        & integer_dict_lookup, integer_dict_free, integer_dict_create_hash
+        use netJina_def
+        
+        type(nuclib_data), intent(in) :: nuclib
+        type(integer_dict), pointer:: nuclide_dict
+        integer, intent(out) :: ierr
+        integer :: indx, ikey
+         
+        if (associated(nuclide_dict)) call integer_dict_free(nuclide_dict)
+        do indx = 1, nuclib% Nnuclides
+            call integer_dict_define(nuclide_dict, &
+            & trim(adjustl(nuclib% name(indx))),indx,ierr)
+        end do
+        call integer_dict_create_hash(nuclide_dict,ierr)
+    end subroutine do_parse_nuclides
     
     subroutine do_load_reaclib(filename,cache_filename,rates,ierr)
         use, intrinsic :: iso_fortran_env, only: iostat_end, error_unit
@@ -229,6 +229,10 @@ contains
             & tmp_rates% reaction_flag(i), &
             & tmp_rates% reverse_flag(i),tmp_rates% Qvalue(i)
             if (io_failure('reading line 1/3',ierr)) return
+            
+            ! set flag if an electron capture rate
+            if (trim(adjustl(tmp_rates% label(i))) == 'ec')  &
+            &   tmp_rates% reaction_flag(i) = 'e'
             
             read(unit=reaclib_unitno,fmt=reaclib_line2,iostat=ierr) &
             & tmp_rates% coefficients(1:4,i)
@@ -298,9 +302,9 @@ contains
         read(cache_unitno) rates% chapter
         read(cache_unitno) rates% species
         read(cache_unitno) rates% label
+        read(cache_unitno) rates% reaction_flag
         read(cache_unitno) rates% reverse_flag
         read(cache_unitno) rates% Qvalue
-        read(cache_unitno) rates% reaction_flag
         read(cache_unitno) rates% coefficients
         read(cache_unitno) rates% N_rate_terms
 
@@ -325,9 +329,9 @@ contains
         write(cache_unitno) rates% chapter
         write(cache_unitno) rates% species
         write(cache_unitno) rates% label
+        write(cache_unitno) rates% reaction_flag
         write(cache_unitno) rates% reverse_flag
         write(cache_unitno) rates% Qvalue
-        write(cache_unitno) rates% reaction_flag
         write(cache_unitno) rates% coefficients
         write(cache_unitno) rates% N_rate_terms
 
@@ -355,6 +359,12 @@ contains
             nin = nJ_Nin(reaclib% chapter(i_rate))
             nout = nJ_Nout(reaclib% chapter(i_rate))
             handle = do_generate_handle(reaclib% species(:,i_rate), nin, nout)
+
+            ! p+p->d is special
+            if (trim(handle) == 'nJ_p_p_to_d' .and.  &
+            &   reaclib% reaction_flag(i_rate) == 'e') then
+                handle = trim(handle)//'_e'
+            end if
 
             call integer_dict_define_and_check(rate_dict,trim(handle),i_rate,duplicate,ierr)
             if (.not. duplicate) then
@@ -385,8 +395,8 @@ contains
         character(len=iso_name_length),  &
         &   dimension(starlib_max_species_per_reaction) :: &
         & species
-        character(len=iso_name_length) :: prov
-        character :: reverse
+        character(len=reaction_reference_length) :: prov
+        character :: reverse, rflag
         real(dp) :: q
         logical :: have_cache
         
@@ -413,7 +423,7 @@ contains
             read(unit=starlib_unitno, fmt=header_format, iostat=iend) header
             if (iend == iostat_end ) exit
             if (io_failure('reading starlib header',ierr)) return
-            call parse_header(header,chapter,ns,species,prov,reverse,q)
+            call parse_header(header,chapter,ns,species,prov,rflag,reverse,q)
             
             read(unit=starlib_unitno,fmt=*,iostat=ierr) &
             &    (T9(j),rate(j),uncertainty(j),j=1,number_starlib_temps)
@@ -422,6 +432,7 @@ contains
             tmp_rates% chapter(i) = chapter
             tmp_rates% species(:,i) = species
             tmp_rates% label(i) = prov
+            tmp_rates% reaction_flag(i) = rflag
             tmp_rates% reverse_flag(i) = reverse
             tmp_rates% Qvalue(i) = q
             tmp_rates% T9(:,i) = T9
@@ -445,23 +456,30 @@ contains
         end if
         
     contains
-        subroutine parse_header(header,chapter,ns,species,prov,reverse,q)
+        subroutine parse_header(header,chapter,ns,species,prov,rflag,reverse,q)
             character(len=64), intent(in) :: header
             integer, intent(out) :: chapter
             integer, intent(out) :: ns
             character(len=iso_name_length), &
             &  dimension(starlib_max_species_per_reaction), intent(out) :: &
             &    species
-            character(len=iso_name_length), intent(out) :: prov
-            character, intent(out) :: reverse
+            character(len=reaction_reference_length), intent(out) :: prov
+            character, intent(out) :: rflag, reverse
             real(dp), intent(out) :: q
             character(len=iso_name_length), &
             &   dimension(starlib_max_species_per_reaction) :: tmp_species
             integer :: j,i
         
             read(header,'(i5,2(a5),4(a5),t44,a4,a1,t53,es12.5)')  &
-            &   chapter, tmp_species(:), prov, reverse, q
+            &   chapter, tmp_species(:), prov, rflag, q
         
+            ! check if reaction flag indicates a reverse rate
+            reverse = ''
+            if (rflag == 'v') reverse = rflag
+            
+            ! check for electron captures
+            if (trim(adjustl(prov)) == 'ec') rflag = 'e'
+            
             species = ''
             ns = 0
             do j= 1, starlib_max_species_per_reaction
@@ -487,6 +505,7 @@ contains
             new_data% chapter(:) = old_data% chapter(1:n)
             new_data% species(:,:) = old_data% species(:,1:n)
             new_data% label(:) = old_data% label(1:n)
+            new_data% reaction_flag(:) = old_data% reaction_flag(1:n)
             new_data% reverse_flag(:) = old_data% reverse_flag(1:n)
             new_data% Qvalue(:) = old_data% Qvalue(1:n)
             new_data% T9(:,:) = old_data% T9(:,1:n)
@@ -514,6 +533,7 @@ contains
         read(cache_unitno) rates% chapter
         read(cache_unitno) rates% species
         read(cache_unitno) rates% label
+        read(cache_unitno) rates% reaction_flag
         read(cache_unitno) rates% reverse_flag
         read(cache_unitno) rates% Qvalue
         read(cache_unitno) rates% T9
@@ -541,6 +561,7 @@ contains
         write(cache_unitno) rates% chapter
         write(cache_unitno) rates% species
         write(cache_unitno) rates% label
+        write(cache_unitno) rates% reaction_flag
         write(cache_unitno) rates% reverse_flag
         write(cache_unitno) rates% Qvalue
         write(cache_unitno) rates% T9
@@ -570,10 +591,13 @@ contains
             nin = nJ_Nin(starlib% chapter(i_rate))
             nout = nJ_Nout(starlib% chapter(i_rate))
             handle = do_generate_handle(starlib% species(:,i_rate), nin, nout)
-            ! p + p -> d has two channels
-            if (trim(handle) == 'nJ_p_p_to_d') &
-            &   handle = trim(handle)//trim(starlib% label(i_rate))
-
+ 
+            ! p+p->d is special
+            if (trim(handle) == 'nJ_p_p_to_d' .and.  &
+            &   starlib% reaction_flag(i_rate) == 'e') then
+                handle = trim(handle)//'_e'
+            end if
+ 
             call integer_dict_define_and_check(starlib_dict, &
             &   trim(handle),i_rate,duplicate,ierr)
             if (duplicate) then
