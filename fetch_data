@@ -10,6 +10,33 @@ function check_okay {
     fi
 }
 
+function fetch_and_verify {
+    # if file exists and is verified, then no need to fetch from repository
+    need_to_fetch=1
+    lib=$1
+    chks=$2
+    url=$3
+    if [ -f $lib ]; then
+        echo "$lib exists...verifying"
+        verify_datafile $lib $chks
+        if [ $? -ne 0 ]; then
+            echo "verification failed"
+            need_to_fetch=1
+        else
+            echo "verification okay"
+            need_to_fetch=0
+        fi
+    fi
+
+    if [ $need_to_fetch -eq 1 ]; then        
+        echo "fetching $lib from $url..."
+        get_datafile $lib $url
+        echo "verifying $lib..."
+        verify_datafile $lib $chks
+        check_okay
+    fi
+}
+
 function get_datafile {
     zip='.gz'
     db=$1
@@ -59,49 +86,11 @@ echo "establishing data directory..."
 mkdir -p data
 check_okay
 cd data
+mkdir -p cache
+check_okay
 
-# if file exists and is verified, then no need to fetch from repository
-need_to_fetch=1
-if [ -f $RLIB ]; then
-    echo "$RLIB exists...verifying"
-    verify_datafile $RLIB $MD5_RLIB
-    if [ $? -ne 0 ]; then
-        echo "verification failed"
-        need_to_fetch=1
-    else
-        echo "verification okay"
-        need_to_fetch=0
-    fi
-fi
-
-if [ $need_to_fetch -eq 1 ]; then        
-    echo "fetching $RLIB from $RLIB_URL..."
-    get_datafile $RLIB $RLIB_URL
-    echo "verifying $RLIB..."
-    verify_datafile $RLIB $MD5_RLIB
-    check_okay
-fi
-
-need_to_fetch=1
-if [ -f $NLIB ]; then
-    echo "$NLIB exists...verifying"
-    verify_datafile $NLIB $MD5_NLIB
-    if [ $? -ne 0 ]; then
-        echo "verification failed"
-        need_to_fetch=1
-    else
-        echo "verification okay"
-        need_to_fetch=0
-    fi
-fi
-
-if [ $need_to_fetch -eq 1 ]; then        
-    echo "fetching $NLIB from $NLIB_URL..."
-    get_datafile $NLIB $NLIB_URL
-    echo "verifying $NLIB..."
-    verify_datafile $NLIB $MD5_NLIB
-    check_okay
-fi
+fetch_and_verify $NLIB $MD5_NLIB $NLIB_URL
+fetch_and_verify $RLIB $MD5_RLIB $RLIB_URL
 
 need_to_fetch=1
 if [ -f $SLIB ]; then
