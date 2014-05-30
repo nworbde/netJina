@@ -7,6 +7,8 @@ Tools for working with [JINA reaclib](https://groups.nscl.msu.edu/jina/reaclib/d
 
 *   The code requires three databases, containing the nuclide database, the reaclib database, and the starlib database.  The script `fetch_data` fetches compresed databases from https://dl.dropboxusercontent.com/u/52649885/netJina/.
 
+    The nuclide and reaclib databases were obtained from the [Joint Institute for Nuclear Astrophysics (JINA)](http://www.jinaweb.org). The starlib data files were obtained from [UNC Nucleosynthesis Simulator](http://starlib.physics.unc.edu).
+
 ## Installation
 
 ### Prerequisite
@@ -97,3 +99,5 @@ After reading in the `reaclib` database, the code generates for each rate a "han
 
 ## To do
 *   The generation of handles and returning of reaction parameters should be handled by one wrapper routine, that would also take care of exceptions.
+
+*   It may make more sense to either work with starlib or reaclib rates, rather than loading both.
