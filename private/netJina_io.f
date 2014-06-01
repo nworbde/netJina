@@ -74,6 +74,7 @@ contains
             read(nuclib_unitno,*) tmp_n% pfcn(1:8,i)
             read(nuclib_unitno,*) tmp_n% pfcn(9:16,i)
             read(nuclib_unitno,*) tmp_n% pfcn(17:24,i)
+            tmp_n% name(i) = adjustl(tmp_n% name(i))
             i = i+1
             if (mod(i,100) == 0)  &
             & write (error_unit,'(a)',advance='no') '.'

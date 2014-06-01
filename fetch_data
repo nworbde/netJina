@@ -78,8 +78,8 @@ MD5_SPAR=743e6599dbe0aac097c61ad8a99f9259
 #locations
 RLIB_URL=https://dl.dropboxusercontent.com/u/52649885/netJina/20140508default2.gz
 NLIB_URL=https://dl.dropboxusercontent.com/u/52649885/netJina/winvne_v2.0.dat.gz
-SLIB_URL=http://dl.dropboxusercontent.com/u/52649885/netJina/starlib_v4.dat.gz
-SPAR_URL=http://dl.dropboxusercontent.com/u/52649885/netJina/partition.dat.gz
+SLIB_URL=https://dl.dropboxusercontent.com/u/52649885/netJina/starlib_v4.dat.gz
+SPAR_URL=https://dl.dropboxusercontent.com/u/52649885/netJina/partition.dat.gz
 
 echo
 echo "Installing Reaclib, Nuclib, and Starlib Datafiles"

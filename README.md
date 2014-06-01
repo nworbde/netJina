@@ -1,14 +1,17 @@
 # netJina
-Tools for working with [JINA reaclib](https://groups.nscl.msu.edu/jina/reaclib/db/).
+Tools for working with [JINA reaclib](https://groups.nscl.msu.edu/jina/reaclib/db/) and [starlib](http://starlib.physics.unc.edu).
 
 ## Dependencies
 
 *   The code is written in FORTRAN, and uses the `utils` and `const` modules from [MESA](http://mesa.sourceforge.net). Compilation and testing have been done with the MESA SDK and with a patched version v6208 of MESA.
 
-*   The code requires three databases, containing the nuclide database, the reaclib database, and the starlib database.  The script `fetch_data` fetches the nuclide and reaclib databases from https://dl.dropboxusercontent.com/u/52649885/netJina/, and the starlib database from http://starlib.physics.unc.edu/.
+*   The code requires three databases, containing the nuclide database, the reaclib database, and the starlib database.  The script `fetch_data` fetches compresed databases from https://dl.dropboxusercontent.com/u/52649885/netJina/.
+
+    The nuclide and reaclib databases were obtained from the [Joint Institute for Nuclear Astrophysics (JINA)](http://www.jinaweb.org). The starlib data files were obtained from [UNC Nucleosynthesis Simulator](http://starlib.physics.unc.edu).
 
 ## Installation
 
+### Prerequisite
 Unfortunately, you need to patch the `utils` module of v6208 of MESA. This necessity will disappear once the latest version of MESA is released.
 
 1.  Copy `utils_patch` into the `utils` directory of your MESA v6022 tree.
@@ -20,9 +23,11 @@ Unfortunately, you need to patch the `utils` module of v6208 of MESA. This neces
 
     ./install [-d /path/to/project/root]
 
-This top-level script calls all of the other build scripts, and installs them in subdirectories of `/path/to/project/root`. If `install` is called with no options, then the files are installed in the local directory.
+This top-level script calls all of the other build scripts, and installs them in subdirectories of `/path/to/project/root`. The fortran `*.mod` include files go into a subdirectory `include`, while the compiled library goes into a subdirectory `lib`. If `install` is called with no options, then the files are installed in the local directory in `include` and `lib`.  The database files and any cache files are placed in a subdirectory `data`.
 
-For a more granular build, first `./fetch_data`: if the data files are missing or have the incorrect checksum, then fresh copies are downloaded and checked. Then `./build_and_test`: the libraries are compiled, and a small test program is compiled and run.  The output of the test program is in `test/test_output` and should be compared to `test/sample_output`. The `*.a` and `*.mod` files should be copied from `make` into their final locations, as should `reaclib_db` and `nuclib_db` from the `data` directory.
+### Detailed
+
+For a more granular build, first `./fetch_data`: if the data files are missing or have the incorrect checksum, then fresh copies are downloaded and checked. Then `./build_and_test`: the libraries are compiled, and a small test program is compiled and run.  The output of the test program is in `test/test_output` and should be compared to `test/sample_output`. The `*.a` and `*.mod` files should be copied from `make` into their final locations, as should `starlib_db`, `reaclib_db`, and `nuclib_db` from the `data` directory. The `data/cache` directory and contents should also be copied to its final location.
 
 ## How to use (still under development)
 Look in `test/src/test_io.f` for an example of source code, and in `test/make/makefile` for an example of compiling and linking the libraries.
@@ -94,6 +99,5 @@ After reading in the `reaclib` database, the code generates for each rate a "han
 
 ## To do
 *   The generation of handles and returning of reaction parameters should be handled by one wrapper routine, that would also take care of exceptions.
-*   Cache the data directories; starlib, in particular, is slow to load
-*   Catch case of electron captures, plus different channels for p+p->d.
 
+*   It may make more sense to either work with starlib or reaclib rates, rather than loading both.
