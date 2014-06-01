@@ -76,7 +76,7 @@ MD5_SLIB=2c6d666e395af3223e50da5a9566d09f
 #locations
 RLIB_URL=https://dl.dropboxusercontent.com/u/52649885/netJina/20140508default2.gz
 NLIB_URL=https://dl.dropboxusercontent.com/u/52649885/netJina/winvne_v2.0.dat.gz
-SLIB_URL=http://dl.dropboxusercontent.com/u/52649885/netJina/starlib_v4.dat.gz
+SLIB_URL=https://dl.dropboxusercontent.com/u/52649885/netJina/starlib_v4.dat.gz
 
 echo
 echo "Installing Reaclib, Nuclib, and Starlib Datafiles"
