@@ -342,7 +342,7 @@ contains
     subroutine do_parse_rates(reaclib,rate_dict,ierr)
         use, intrinsic :: iso_fortran_env, only : error_unit
         use utils_def, only: integer_dict
-        use utils_lib, only: integer_dict_define_and_check, integer_dict_free
+        use utils_lib, only: integer_dict_define_and_report_duplicates, integer_dict_free
         use netJina_def
         
         type(reaclib_data), intent(inout) :: reaclib
@@ -367,7 +367,7 @@ contains
                 handle = trim(handle)//'_e'
             end if
 
-            call integer_dict_define_and_check(rate_dict,trim(handle),i_rate,duplicate,ierr)
+            call integer_dict_define_and_report_duplicates(rate_dict,trim(handle),i_rate,duplicate,ierr)
             if (.not. duplicate) then
                 reaclib% N_rate_terms(i_rate) = 1
             else
@@ -575,7 +575,7 @@ contains
     subroutine do_parse_starlib(starlib,starlib_dict,ierr)
         use, intrinsic :: iso_fortran_env, only : error_unit
         use utils_def, only: integer_dict
-        use utils_lib, only: integer_dict_define_and_check, integer_dict_free
+        use utils_lib, only: integer_dict_define_and_report_duplicates, integer_dict_free
         use netJina_def
         
         type(starlib_data), intent(inout) :: starlib
@@ -599,7 +599,7 @@ contains
                 handle = trim(handle)//'_e'
             end if
  
-            call integer_dict_define_and_check(starlib_dict, &
+            call integer_dict_define_and_report_duplicates(starlib_dict, &
             &   trim(handle),i_rate,duplicate,ierr)
             if (duplicate) then
                 write(error_unit,'(a)') trim(handle)//' is duplicate'
